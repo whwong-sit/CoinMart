@@ -9,36 +9,37 @@ Feature: Register Page
 
   Scenario: Register Failure1
     When a user visits the register page
-    And she signs up with username "gogogostn" and email "stn131415@gamil.com" and password "12345678" and password1 "12345677"
-    Then she should see a message of Please confirm your password
+    And she signs up with username "gogogostn" and email "stn131415@gamil.com" and password "12345678" and confirm password with "12345677"
+    Then she should see a message of "Passwords do not match"
 
   Scenario: Register Failure2
     When a user visits the register page
-    And she signs up with username "gogogostn" and email "stn131415@gamil.com" and password "12345678" and password1 "12345678"
+    And she signs up with username "gogogostn" and email "stn131415@gamil.com" and password "12345678" and confirm password with "12345678"
     Then she should see a message of Username or password invalid
 
   Scenario: Register Failure3
     When a user visits the register page
-    And she signs up with username "gogogostn" and email "stn131415@gamil.com" and password "1234567a" and password1 "1234567a"
+    And she signs up with username "gogogostn" and email "stn131415@gamil.com" and password "1234567a" and confirm password with "1234567a"
     Then she should see a message of Username or password invalid
 
   Scenario: Register Failure4
     When a user visits the register page
-    And she signs up with username "gogogostn" and email "stn131415@gamil.com" and password "12345aA" and password1 "12345aA"
+    And she signs up with username "gogogostn" and email "stn131415@gamil.com" and password "12345aA" and confirm password with "12345aA"
     Then she should see a message of Username or password invalid
 
   Scenario: Register Failure5
     When a user visits the register page
-    And she signs up with username "admin" and email "stn131415@gamil.com" and password "123456Aa" and password1 "123456Aa"
-    Then she should see a message of User name has already existed, please try again
+    And she signs up with username "admin" and email "stn131415@gamil.com" and password "123456Aa" and confirm password with "123456Aa"
+    Then she should see a message of "User already registered"
 
   Scenario: Register Success
     When a user visits the register page
-    And she signs up with username "gogogostn" and email "stn131415@gamil.com" and password "123456aA" and password1 "123456aA"
-    Then she should see a message of Register successfully
+    And she signs up with username "gogogostn" and email "stn131415@gamil.com" and password "123456aA" and confirm password with "123456aA"
+    Then she should see a message confirming successful registration
 
   Scenario: Register Link test
     Given a user visits the site
+    And she is logged out
      Then she should see the Register link
      When she clicks on the Register link
      Then she turns to register page

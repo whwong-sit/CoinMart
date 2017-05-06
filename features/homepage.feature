@@ -8,7 +8,6 @@ Feature: Home Page
 
   Scenario: Login Link
     Given a user visits the site
-    And she is not logged in
     Then she should see the Login link
 
   Scenario: Logout Link
@@ -19,4 +18,5 @@ Feature: Home Page
 
   Scenario: Register Link
     Given a user visits the site
+    And she is logged out
     Then she should see the Register link
