@@ -1,5 +1,4 @@
 *.log
-<<<<<<< HEAD
 local_settings.py
 
 # Flask stuff:
@@ -38,6 +37,11 @@ ENV/
 .ropeproject
 
 #Coinmart virtualenv
-coinmart
+cm_env
+
+#Dev stuff
 *.pyc
 .DS_Store
+.cache
+.eggs
+flaskr.egg-info/
