@@ -58,7 +58,7 @@ def test_register_login(client):
     with client as c:
         rv = login(client, 'admin', 'default')
         assert b'You were logged in' in rv.data
-        rv = client.post('/add', data=dict(
+        rv = client.post('/register', data=dict(
             username='Test',
             password='Hema7067',
             email='Test@yahoo.com',
@@ -71,7 +71,7 @@ def test_register_login(client):
 def test_register_invalid_password(client):
     rv = login(client, 'admin', 'default')
     assert b'You were logged in' in rv.data
-    rv = client.post('/add', data=dict(
+    rv = client.post('/register', data=dict(
         username='test',
         password='test',
         email='test@yahoo.com',
@@ -84,7 +84,7 @@ def test_register_invalid_password(client):
 def test_register_password_match(client):
     rv = login(client, 'admin', 'default')
     assert b'You were logged in' in rv.data
-    rv = client.post('/add', data=dict(
+    rv = client.post('/register', data=dict(
         username='Test',
         password='Svalli30',
         email='test@yahoo.com',
@@ -98,7 +98,7 @@ def test_registered_users(client):
     rv = login(client, flaskr.app.config['USERNAME'],
                flaskr.app.config['PASSWORD'])
     assert b'You were logged in' in rv.data
-    rv = client.post('/add', data=dict(
+    rv = client.post('/register', data=dict(
         username='Test1',
         password='Hema7067',
         email='test@yahoo.com',
