@@ -45,3 +45,4 @@ cm_env
 .cache
 .eggs
 flaskr.egg-info/
+.idea
