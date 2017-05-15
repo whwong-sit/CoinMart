@@ -11,3 +11,5 @@ create table users (
   email text not null
 );
 
+insert into users values('admin', 'default', 'admin@uni.sydney.edu.au');
+

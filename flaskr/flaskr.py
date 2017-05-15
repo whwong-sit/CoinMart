@@ -79,20 +79,24 @@ def add_watchlist():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     error = None
-    users = [dict(username=row[0], password=row[1]) for row in get_db().execute('select username, password from users order by username desc').fetchall()]
-    registeredmembers=[]
-    for i in users:
-        registeredmembers.append(i['username'])
     if request.method == 'POST':
         user = request.form['username']
         passw = request.form['password']
-        if {'username':user,'password':passw} in users:
-              session['logged_in'] = True
-              flash('You were logged in')
-              return redirect(url_for('show_entries'))
-        elif user not in registeredmembers:
+        if user and passw:
+            db = get_db()
+            cur = db.execute("select *  from users where username =? and password=?", [user, passw])
+            rows = cur.fetchone()
+            cur1 = db.execute("select *  from users where Email =? and password=?", [user, passw])
+            rows1 = cur1.fetchone()
+            cur2 = db.execute("select username  from users")
+            rows2 = cur2.fetchone()
+            if rows or rows1:
+                session['logged_in'] = True
+                flash("Login Success!")
+                return render_template('show_entries.html')
+            elif user not in rows2:
               error = 'User not registered'
-        else:
+            else:
               error = 'Incorrect username or password'
     return render_template('login.html', error=error)
 
@@ -148,7 +152,7 @@ def start():
         SECRET_KEY='Production key',
     ))
     app.config.from_envvar('FLASKR_SETTINGS',  silent=True)
-    app.run(port=5008)
+    app.run(port=5000)
 
 def test_server():
     ### Setup for integration testing

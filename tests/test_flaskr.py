@@ -39,10 +39,15 @@ def test_empty_db(client):
 
 def test_login_logout(client):
     rv = login(client, 'admin', 'default')
-    assert b'You were logged in' in rv.data
+    assert b'Login Success!' in rv.data
     rv = logout(client)
     assert b'You were logged out' in rv.data
 
+def test_login_logout1(client):
+    rv = login(client, 'admin@uni.sydney.edu.au', 'default')
+    assert b'Login Success!' in rv.data
+    rv = logout(client)
+    assert b'You were logged out' in rv.data
 
 def test_login_incorrect_credentials(client):
     with client as c:
@@ -57,7 +62,7 @@ def test_login_incorrect_credentials(client):
 def test_register_login(client):
     with client as c:
         rv = login(client, 'admin', 'default')
-        assert b'You were logged in' in rv.data
+        assert b'Login Success!' in rv.data
         rv = client.post('/register', data=dict(
             username='Test',
             password='Hema7067',
@@ -70,7 +75,7 @@ def test_register_login(client):
 
 def test_register_invalid_password(client):
     rv = login(client, 'admin', 'default')
-    assert b'You were logged in' in rv.data
+    assert b'Login Success!' in rv.data
     rv = client.post('/register', data=dict(
         username='test',
         password='test',
@@ -83,7 +88,7 @@ def test_register_invalid_password(client):
 
 def test_register_password_match(client):
     rv = login(client, 'admin', 'default')
-    assert b'You were logged in' in rv.data
+    assert b'Login Success!' in rv.data
     rv = client.post('/register', data=dict(
         username='Test',
         password='Svalli30',
@@ -97,7 +102,7 @@ def test_register_password_match(client):
 def test_registered_users(client):
     rv = login(client, flaskr.app.config['USERNAME'],
                flaskr.app.config['PASSWORD'])
-    assert b'You were logged in' in rv.data
+    assert b'Login Success!' in rv.data
     rv = client.post('/register', data=dict(
         username='Test1',
         password='Hema7067',
@@ -106,4 +111,3 @@ def test_registered_users(client):
     ), follow_redirects=True)
     if __name__ == '__main__':
         assert b'User already registered' in rv.data
-

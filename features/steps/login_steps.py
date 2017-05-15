@@ -4,19 +4,17 @@ import re
 from login_utils import *
 import time
 
-from behave import *
-
 
 @when(u'a user visits the login page')
 def visit_login(context):
     context.browser.get(context.server_address + "/login")
-    time.sleep(1)
 
 
 @then(u'she should see the username field')
 def see_username_field(context):
     flaskr_found = re.search("Username:", context.browser.page_source, re.IGNORECASE)
     assert flaskr_found
+
 
 @then(u'she should see the password field')
 def see_password_field(context):
@@ -27,7 +25,6 @@ def see_password_field(context):
 @then(u'she should see the login button')
 def see_login_button(context):
     flaskr_found = re.search("Login", context.browser.page_source, re.IGNORECASE)
-    time.sleep(0.5)
     assert flaskr_found
 
 
@@ -40,43 +37,37 @@ def login(context, username, password):
     uname.clear();
     passwd.clear();
     uname.send_keys(username)
-    time.sleep(0.6)
     passwd.send_keys(password)
-    time.sleep(1)
     login_button.click()
 
 
 @then(u'she should see a message of login success')
 def see_login_success(context):
-    time.sleep(0.4)
-    flaskr_found = re.search("You were logged in", context.browser.page_source, re.IGNORECASE)
+    flaskr_found = re.search("Login Success!", context.browser.page_source, re.IGNORECASE)
     assert flaskr_found
-
 
 
 @then(u'she should see a message of "user not registered"')
 def see_login_failure_not_registered(context):
-    time.sleep(0.4)
     flaskr_found = re.search("User not registered", context.browser.page_source, re.IGNORECASE)
     assert flaskr_found
 
+
 @then(u'she should see a message of "incorrect username or password"')
 def see_login_failure(context):
-    time.sleep(0.4)
     flaskr_found = re.search("Incorrect username or password", context.browser.page_source, re.IGNORECASE)
     assert flaskr_found
+
 
 @given(u'a user visits the login page')
 def login_page(context):
     context.browser.get(context.server_address + "/login")
-    time.sleep(0.4)
 
 
 @given(u'she sees the Logout link')
 def see_logout_link(context):
     flaskr_found = re.search("Log out", context.browser.page_source, re.IGNORECASE)
     assert flaskr_found
-
 
 
 @when(u'she clicks on the Logout link')
@@ -89,14 +80,17 @@ def click_logout_link(context):
 def visit_site(context):
     pass
 
+
 @then(u'she sees a message telling her she has logged out')
 def see_logout_success(context):
+    time.sleep(0.4)
     flaskr_found = re.search("You were logged out", context.browser.page_source, re.IGNORECASE)
     assert flaskr_found
 
+
 @given(u'she is logged out')
 def click_logout_link(context):
-    Logout_found = context.browser.find_element_by_link_text("log out")
-    if Logout_found:
-        Logout_found.click()
+    logout_found = context.browser.find_element_by_link_text("log out")
+    if logout_found:
+        logout_found.click()
     pass
