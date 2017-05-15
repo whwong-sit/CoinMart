@@ -14,6 +14,14 @@ Feature: Login Page
     And she logs in with username "admin" and password "default"
     Then she should see a message of login success
 
+  Scenario: Register and Login Email Success
+    When a user visits the register page
+    And she signs up with username "jiminy" and email "jiminy@cricket.com" and password "123456aA" and confirm password with "123456aA"
+    Then she should see a message confirming successful registration
+    When a user visits the login page
+    And she logs in with username "jiminy@cricket.com" and password "123456aA"
+    Then she should see a message of login success
+
   Scenario: Login User not found
     Given a user visits the site
     And she is logged out
