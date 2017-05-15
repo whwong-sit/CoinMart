@@ -12,5 +12,4 @@ create table users (
 );
 
 insert into users values('admin', 'default', 'admin@uni.sydney.edu.au');
-
-
+insert into users values('test', 'test123', 'test@uni.sydney.edu.au');
