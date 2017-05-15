@@ -37,11 +37,12 @@ ENV/
 .ropeproject
 
 #Coinmart virtualenv
+<<<<<<< HEAD
 cm_env
 
 #Dev stuff
 *.pyc
-.DS_Store
+**/.DS_Store
 .cache
 .eggs
 flaskr.egg-info/
