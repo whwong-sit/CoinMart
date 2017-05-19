@@ -1,21 +1,21 @@
 # coding=utf-8
 import os
 import pytest
-import flaskr
-from flaskr import flaskr
+import coinmart
+from coinmart import coinmart
 import tempfile
 
 
 @pytest.fixture
 def client(request):
-    db_fd, flaskr.app.config['DATABASE'] = tempfile.mkstemp()
-    flaskr.app.config['TESTING'] = True
-    client = flaskr.app.test_client()
-    with flaskr.app.app_context():
-        flaskr.init_db()
+    db_fd, coinmart.app.config['DATABASE'] = tempfile.mkstemp()
+    coinmart.app.config['TESTING'] = True
+    client = coinmart.app.test_client()
+    with coinmart.app.app_context():
+        coinmart.init_db()
     def teardown():
         os.close(db_fd)
-        os.unlink(flaskr.app.config['DATABASE'])
+        os.unlink(coinmart.app.config['DATABASE'])
     request.addfinalizer(teardown)
     return client
 
@@ -100,8 +100,8 @@ def test_register_password_match(client):
 
 
 def test_registered_users(client):
-    rv = login(client, flaskr.app.config['USERNAME'],
-               flaskr.app.config['PASSWORD'])
+    rv = login(client, coinmart.app.config['USERNAME'],
+               coinmart.app.config['PASSWORD'])
     assert b'Login Success!' in rv.data
     rv = client.post('/register', data=dict(
         username='Test1',

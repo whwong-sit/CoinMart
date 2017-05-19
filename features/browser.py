@@ -1,7 +1,6 @@
 # Credit to tutorial from http://accraze,info/selenium-tests-with-behave-bdd/
 from selenium import webdriver
-import flaskr
-from flaskr import app
+
 
 class Browser(object):
 
