@@ -3,7 +3,6 @@ import os
 import sqlite3
 import re
 import time
-
 from flask import Flask, request, session, g, redirect, url_for, abort, \
      render_template, flash
 
@@ -54,27 +53,22 @@ def close_db(error):
         g.sqlite_db.close()
 
 @app.route('/')
-def show_entries():
+def show_watchlists():
+    user_watchlists = get_user_watchlists()
+    return render_template('dashboard.html', watchlists=user_watchlists)
+
+def get_user_watchlists():
     db = get_db()
-    cur = db.execute('select title, text from watchlists order by id desc')
-    entries = cur.fetchall()
-    return render_template('show_entries.html', entries=entries)
+    auth_user = session.get("username")
+    cur = db.execute('select * from user_watchlists, watchlist_items where user_watchlists.watchlist_id = watchlist_items.watchlist_id and user_watchlists.username = "%s"' % auth_user)
+    watchlists = cur.fetchall()
+    return watchlists
 
 def query_db(query, args=(), one=False):
     cur = get_db().execute(query, args)
     rv = cur.fetchall()
     cur.close()
     return (rv[0] if rv else None) if one else rv
-
-@app.route('/add', methods=['POST'])
-def add_watchlist():
-    if not session['logged_in']:
-        abort(401)
-    db=get_db()
-    db.execute("insert into watchlists(title,text) values (?,?)", [request.form['title'], request.form['text']])
-    db.commit()
-    flash('New watchlist added')
-    return redirect(url_for('show_entries'))
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -92,8 +86,10 @@ def login():
             rows2 = cur2.fetchone()
             if rows or rows1:
                 session['logged_in'] = True
+                session['username'] = user
                 flash("Login Success!")
-                return render_template('show_entries.html')
+                user_watchlists = get_user_watchlists()
+                return render_template('dashboard.html', watchlists=user_watchlists)
             elif user not in rows2:
               error = 'User not registered'
             else:
@@ -105,7 +101,7 @@ def logout():
     session.pop('logged_in', None)
     flash('You were logged out')
     time.sleep(1)
-    return redirect(url_for('show_entries'))
+    return redirect(url_for('show_watchlists'))
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -134,7 +130,7 @@ def register():
             get_db().commit()
             session['logged_in'] = True
             flash('You were successfully registered and have been logged in')
-            return redirect(url_for('show_entries'))
+            return redirect(url_for('show_watchlists'))
     return render_template('register.html', error=error)
 
 @app.route('/shutdown')

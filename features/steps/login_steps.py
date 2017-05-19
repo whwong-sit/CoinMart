@@ -4,6 +4,8 @@ import re
 from login_utils import *
 import time
 
+from behave import *
+
 
 @when(u'a user visits the login page')
 def visit_login(context):
@@ -12,20 +14,20 @@ def visit_login(context):
 
 @then(u'she should see the username field')
 def see_username_field(context):
-    flaskr_found = re.search("Username:", context.browser.page_source, re.IGNORECASE)
-    assert flaskr_found
+    coinmart_found = re.search("Username:", context.browser.page_source, re.IGNORECASE)
+    assert coinmart_found
 
 
 @then(u'she should see the password field')
 def see_password_field(context):
-    flaskr_found = re.search("Password:", context.browser.page_source, re.IGNORECASE)
-    assert flaskr_found
+    coinmart_found = re.search("Password:", context.browser.page_source, re.IGNORECASE)
+    assert coinmart_found
 
 
 @then(u'she should see the login button')
 def see_login_button(context):
-    flaskr_found = re.search("Login", context.browser.page_source, re.IGNORECASE)
-    assert flaskr_found
+    coinmart_found = re.search("Login", context.browser.page_source, re.IGNORECASE)
+    assert coinmart_found
 
 
 @when(u'she logs in with username "{username}" and password "{password}"')
@@ -43,20 +45,20 @@ def login(context, username, password):
 
 @then(u'she should see a message of login success')
 def see_login_success(context):
-    flaskr_found = re.search("Login Success!", context.browser.page_source, re.IGNORECASE)
-    assert flaskr_found
+    coinmart_found = re.search("Login Success!", context.browser.page_source, re.IGNORECASE)
+    assert coinmart_found
 
 
 @then(u'she should see a message of "user not registered"')
 def see_login_failure_not_registered(context):
-    flaskr_found = re.search("User not registered", context.browser.page_source, re.IGNORECASE)
-    assert flaskr_found
+    coinmart_found = re.search("User not registered", context.browser.page_source, re.IGNORECASE)
+    assert coinmart_found
 
 
 @then(u'she should see a message of "incorrect username or password"')
 def see_login_failure(context):
-    flaskr_found = re.search("Incorrect username or password", context.browser.page_source, re.IGNORECASE)
-    assert flaskr_found
+    coinmart_found = re.search("Incorrect username or password", context.browser.page_source, re.IGNORECASE)
+    assert coinmart_found
 
 
 @given(u'a user visits the login page')
@@ -66,8 +68,8 @@ def login_page(context):
 
 @given(u'she sees the Logout link')
 def see_logout_link(context):
-    flaskr_found = re.search("Log out", context.browser.page_source, re.IGNORECASE)
-    assert flaskr_found
+    coinmart_found = re.search("Log out", context.browser.page_source, re.IGNORECASE)
+    assert coinmart_found
 
 
 @when(u'she clicks on the Logout link')
@@ -84,8 +86,8 @@ def visit_site(context):
 @then(u'she sees a message telling her she has logged out')
 def see_logout_success(context):
     time.sleep(0.4)
-    flaskr_found = re.search("You were logged out", context.browser.page_source, re.IGNORECASE)
-    assert flaskr_found
+    coinmart_found = re.search("You were logged out", context.browser.page_source, re.IGNORECASE)
+    assert coinmart_found
 
 
 @given(u'she is logged out')

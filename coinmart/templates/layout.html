@@ -13,7 +13,7 @@
   <h1>Coin Mart</h1>
   <div class=metanav>
    <ul class="nav nav-pills">
-    <li role="presentation" class="active"><a href="{{ url_for('show_entries') }}">Home</a></li>
+    <li role="presentation" class="active"><a href="{{ url_for('show_watchlists') }}">Dashboard</a></li>
     <li role="presentation" name=register_link><a href="{{ url_for('register') }}">sign up</a ></li>
   {% if not session.logged_in %}
     <li role="presentation" name=login_link><a href=" {{url_for('login') }}">log in</a ></li>

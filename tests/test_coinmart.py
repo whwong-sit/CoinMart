@@ -111,3 +111,15 @@ def test_registered_users(client):
     ), follow_redirects=True)
     if __name__ == '__main__':
         assert b'User already registered' in rv.data
+
+def test_user_watchlist(client):
+    with client as c:
+        rv = c.post('/login', data=dict(
+            username='Test',
+            password='Test_123'
+        ), follow_redirects=True)
+    if __name__ == '__main__':
+        assert b'Login Success!' in rv.data
+        assert client.get('/')
+        assert client.show_watchlists()
+

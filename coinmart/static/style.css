@@ -10,11 +10,11 @@ h2              { font-size: 0.8em; }
 
 .page           { margin: 2em auto; width: 35em; border: 5px solid #ccc;
                   padding: 0.8em; background: white; }
-.entries        { list-style: none; margin: 0; padding: 0; }
-.entries li     { margin: 0.8em 1.2em; }
-.entries li h2  { margin-left: -1em; }
-.add-entry      { font-size: 0.9em; border-bottom: 1px solid #ccc; }
-.add-entry dl   { font-weight: bold; }
+.watchlists        { list-style: none; margin: 0; padding: 0; }
+.watchlists li     { margin: 0.8em 1.2em; }
+.watchlists li h2  { margin-left: -1em; }
+.watchlists      { font-size: 0.9em; border-bottom: 1px solid #ccc; }
+.watchlists dl   { font-weight: bold; }
 .metanav        { text-align: right; font-size: 0.8em; padding: 0.3em;
                   margin-bottom: 1em; background: #fafafa; }
 .flash          { background: #cee5F5; padding: 0.5em;

@@ -4,6 +4,8 @@ import re
 from login_utils import *
 import time
 
+from behave import *
+
 
 @when(u'a user visits the register page')
 def visit_register(context):
@@ -13,14 +15,14 @@ def visit_register(context):
 
 @then(u'she should see the confirm password field')
 def see_passwordConfirm_field(context):
-    flaskr_found = re.search("Confirm Password:", context.browser.page_source, re.IGNORECASE)
-    assert flaskr_found
+    coinmart_found = re.search("Confirm Password:", context.browser.page_source, re.IGNORECASE)
+    assert coinmart_found
 
 
 @then(u'she should see the register button')
 def see_register_button(context):
-    flaskr_found = re.search("Register", context.browser.page_source, re.IGNORECASE)
-    assert flaskr_found
+    coinmart_found = re.search("Register", context.browser.page_source, re.IGNORECASE)
+    assert coinmart_found
 
 
 @when(u'she signs up with username "{username}" and email "{email}" and password "{password}" and confirm password with "{password1}"')
@@ -44,26 +46,26 @@ def register(context, username, email, password, password1):
 
 @then(u'she should see a message of "Passwords do not match"')
 def see_register_failure4(context):
-    flaskr_found = re.search("Passwords do not match", context.browser.page_source, re.IGNORECASE)
-    assert flaskr_found
+    coinmart_found = re.search("Passwords do not match", context.browser.page_source, re.IGNORECASE)
+    assert coinmart_found
 
 
 @then(u'she should see a message of Username or password invalid')
 def see_register_failure3(context):
-    flaskr_found = re.search("Invalid password. Passwords must contain at least 8 characters, and at least one capital letter and number", context.browser.page_source, re.IGNORECASE)
-    assert flaskr_found
+    coinmart_found = re.search("Invalid password. Passwords must contain at least 8 characters, and at least one capital letter and number", context.browser.page_source, re.IGNORECASE)
+    assert coinmart_found
 
 
 @then(u'she should see a message of "User already registered"')
 def see_register_failure1(context):
-    flaskr_found = re.search("User already registered", context.browser.page_source, re.IGNORECASE)
-    assert flaskr_found
+    coinmart_found = re.search("User already registered", context.browser.page_source, re.IGNORECASE)
+    assert coinmart_found
 
 
 @then(u'she should see a message confirming successful registration')
 def see_register_success(context):
-    flaskr_found = re.search("You were successfully registered and have been logged in", context.browser.page_source, re.IGNORECASE)
-    assert flaskr_found
+    coinmart_found = re.search("You were successfully registered and have been logged in", context.browser.page_source, re.IGNORECASE)
+    assert coinmart_found
 
 
 @When(u'she clicks on the Register link')

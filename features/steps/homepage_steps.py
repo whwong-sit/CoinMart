@@ -11,8 +11,8 @@ def visit(context):
 
 @then(u'she should see Coin Mart')
 def see(context):
-    flaskr_found = re.search("Coin Mart", context.browser.page_source, re.IGNORECASE)
-    assert flaskr_found
+    coinmart_found = re.search("Coin Mart", context.browser.page_source, re.IGNORECASE)
+    assert coinmart_found
 
 
 @given(u'she is not logged in')
