@@ -1,0 +1,1 @@
+from .coinmart import app

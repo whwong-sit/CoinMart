@@ -1,12 +1,11 @@
 import threading
-#from wsgiref import simple_server
 from selenium import webdriver
-import flaskr
-from flaskr import app
+import coinmart
+from coinmart import app
 
 
 def before_all(context):
-    context.server = flaskr.flaskr
+    context.server = coinmart.coinmart
     context.thread = threading.Thread(target=context.server.test_server)
     context.thread.start()  # start flask app server
     context.browser = webdriver.Chrome()
