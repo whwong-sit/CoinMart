@@ -1,5 +1,5 @@
 # CoinMart
-<h3>Coinmart - Sprint 1</h3>
+<h3>Coinmart - Sprint 2</h3>
 <h3>User Stories and Sub Task</h3>
 <p>1) Sub Task - Create a watchlist function which lists the watchlists for the given 
 user in the dashboard layout. (3 points) </p>
