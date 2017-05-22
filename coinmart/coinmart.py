@@ -8,19 +8,19 @@ import requests
 from flask import Flask, request, session, g, redirect, url_for, abort, \
      render_template, flash
 
-os.environ['FLASK_APP'] = 'flaskr'
+os.environ['FLASK_APP'] = 'coinmart'
 
 app = Flask(__name__) # create the application instance :)
 app.config.from_object(__name__) # load config from this file , CoinMartIndividual.py
 
 # Load default config and override config from an environment variable
 app.config.update(dict(
-    DATABASE=os.path.join(app.root_path, 'flaskr.db'),
+    DATABASE=os.path.join(app.root_path, 'coinmart.db'),
     SECRET_KEY='development key',
     USERNAME='admin',
     PASSWORD='default'
 ))
-app.config.from_envvar('FLASKR_SETTINGS', silent=True)
+app.config.from_envvar('COINMART_SETTINGS', silent=True)
 
 def connect_db():
     """Connects to the specific database."""
@@ -163,10 +163,10 @@ def start():
     app.config.from_object(__name__) # load config from this file
 
     app.config.update(dict(
-        DATABASE=os.path.join(app.root_path, 'flaskr.db'),
+        DATABASE=os.path.join(app.root_path, 'coinmart.db'),
         SECRET_KEY='Production key',
     ))
-    app.config.from_envvar('FLASKR_SETTINGS',  silent=True)
+    app.config.from_envvar('COINMART_SETTINGS',  silent=True)
     app.run(port=5000)
 
 def test_server():
@@ -174,12 +174,12 @@ def test_server():
     app.config.from_object(__name__) # load config from this file
 
     app.config.update(dict(
-        DATABASE=os.path.join(app.root_path, 'flaskr_test.db'),
+        DATABASE=os.path.join(app.root_path, 'coinmart_test.db'),
         SECRET_KEY='Test key',
         SERVER_NAME='localhost:5006',
         # DEBUG=True, # does not work from behave
     ))
-    app.config.from_envvar('FLASKR_TEST_SETTINGS',  silent=True)
+    app.config.from_envvar('COINMART_TEST_SETTINGS',  silent=True)
     app.environment = 'test'
     with app.app_context():
         init_db('test_schema.sql')
