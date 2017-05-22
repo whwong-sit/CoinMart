@@ -35,8 +35,7 @@ Feature: Login Page
     And she logs in with username "admin" and password "badpasswd"
     Then she should see a message of "incorrect username or password"
 
-
-   Scenario: Logout
+  Scenario: Logout
      Given a user visits the login page
      When she logs in
      And she clicks on the Logout link
