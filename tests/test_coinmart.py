@@ -122,11 +122,27 @@ def test_registered_users(client):
     if __name__ == '__main__':
         assert b'User already registered' in rv.data
 
+
 def test_getExchangeRateIsFloat():
     assert isinstance(getExchangeRate('bitcoin', 'EUR'), float)
+
 
 def test_getExchangeRateComparison():
     assert getExchangeRate('bitcoin', 'EUR') != getExchangeRate('bitcoin', 'AUD')
 
+
 def test_getExchangeRateComparison2():
     assert getExchangeRate('ethereum', 'GBP') != getExchangeRate('bitcoin', 'GBP')
+
+
+def test_user_watchlist(client):
+    with client as c:
+        rv = c.post('/login', data=dict(
+            username='Test',
+            password='Test_123'
+        ), follow_redirects=True)
+    if __name__ == '__main__':
+        assert b'Login Success!' in rv.data
+        assert client.get('/')
+        assert client.show_watchlists()
+

@@ -45,5 +45,5 @@ cm_env
 **/.DS_Store
 .cache
 .eggs
-flaskr.egg-info/
+coinmart.egg-info/
 .idea
