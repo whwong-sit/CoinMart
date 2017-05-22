@@ -37,9 +37,9 @@ Feature: Register Page
     And she signs up with username "gogogostn" and email "stn131415@gamil.com" and password "123456aA" and confirm password with "123456aA"
     Then she should see a message confirming successful registration
 
-  Scenario: Register Link test
+  Scenario: Sign up Link test
     Given a user visits the site
     And she is logged out
-     Then she should see the Register link
-     When she clicks on the Register link
+     Then she should see the Sign up link
+     When she clicks on the Sign up link
      Then she turns to register page
