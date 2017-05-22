@@ -3,6 +3,7 @@ import os
 import sqlite3
 import re
 import time
+import requests
 
 from flask import Flask, request, session, g, redirect, url_for, abort, \
      render_template, flash
@@ -75,6 +76,20 @@ def add_watchlist():
     db.commit()
     flash('New watchlist added')
     return redirect(url_for('show_entries'))
+
+def getExchangeRate(currency_1, currency_2):
+    currency_convert_from = currency_1
+    currency_convert_to = currency_2
+    currency_convert_to_lowercase = currency_convert_to.lower()
+
+    main_api = 'https://api.coinmarketcap.com/v1/ticker/'
+    search_currency = currency_convert_from + '/?convert=' + currency_convert_to
+    url = main_api + search_currency
+
+    json_data = requests.get(url).json()
+    json_convert_price = json_data[0]['price_' + currency_convert_to_lowercase]
+    price = float(json_convert_price)
+    return price
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():

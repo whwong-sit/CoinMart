@@ -4,6 +4,7 @@ import pytest
 import flaskr
 from flaskr import flaskr
 import tempfile
+import requests
 
 
 @pytest.fixture
@@ -30,6 +31,15 @@ def login(client, username, password):
 def logout(client):
     return client.get('/logout', follow_redirects=True)
 
+def getExchangeRate(currency_1, currency_2):
+    currency_2_lowercase = currency_2.lower()
+    main_api = 'https://api.coinmarketcap.com/v1/ticker/'
+    search_currency = currency_1 + '/?convert=' + currency_2
+    url = main_api + search_currency
+    json_data = requests.get(url).json()
+    json_convert_price = json_data[0]['price_' + currency_2_lowercase]
+    price = float(json_convert_price)
+    return price
 
 def test_empty_db(client):
     rv = client.get('/')
@@ -111,3 +121,12 @@ def test_registered_users(client):
     ), follow_redirects=True)
     if __name__ == '__main__':
         assert b'User already registered' in rv.data
+
+def test_getExchangeRateIsFloat():
+    assert isinstance(getExchangeRate('bitcoin', 'EUR'), float)
+
+def test_getExchangeRateComparison():
+    assert getExchangeRate('bitcoin', 'EUR') != getExchangeRate('bitcoin', 'AUD')
+
+def test_getExchangeRateComparison2():
+    assert getExchangeRate('ethereum', 'GBP') != getExchangeRate('bitcoin', 'GBP')
