@@ -53,12 +53,6 @@ def see_login_failure_not_registered(context):
     assert flaskr_found
 
 
-@then(u'she should see a message of "incorrect username or password"')
-def see_login_failure(context):
-    flaskr_found = re.search("Incorrect username or password", context.browser.page_source, re.IGNORECASE)
-    assert flaskr_found
-
-
 @given(u'a user visits the login page')
 def login_page(context):
     context.browser.get(context.server_address + "/login")

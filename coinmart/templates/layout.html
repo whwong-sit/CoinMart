@@ -47,7 +47,7 @@
       <div class="header clearfix">
         <nav>
           <ul class="nav nav-pills pull-right">
-            <li role="presentation" ><a href="{{ url_for('show_entries') }}">Home</a></li>
+            <li role="presentation" ><a href="{{ url_for('show_watchlists') }}">Home</a></li>
             <li role="presentation"><a href="{{ url_for('register') }}">Sign up</a></li>
               {% if not session.logged_in %}
                 <li role="presentation"><a href=" {{url_for('login') }}">log in</a></li>
