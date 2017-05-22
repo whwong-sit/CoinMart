@@ -16,7 +16,7 @@ Feature: Home Page
     And she returns to the site
     Then she should see the Logout link
 
-  Scenario: Register Link
+  Scenario: Sign up Link
     Given a user visits the site
     And she is logged out
-    Then she should see the Register link
+    Then she should see the Sign up link

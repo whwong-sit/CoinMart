@@ -41,7 +41,7 @@ def step_impl(context):
     assert logout_found
 
 
-@then(u'she should see the Register link')
+@then(u'she should see the Sign up link')
 def step_impl(context):
     signup_found = re.search("sign up", context.browser.page_source, re.IGNORECASE)
     assert signup_found
