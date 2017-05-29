@@ -1,22 +1,22 @@
 # coding=utf-8
 import os
 import pytest
-import flaskr
-from flaskr import flaskr
+import coinmart
+from coinmart import coinmart
 import tempfile
 import requests
 
 
 @pytest.fixture
 def client(request):
-    db_fd, flaskr.app.config['DATABASE'] = tempfile.mkstemp()
-    flaskr.app.config['TESTING'] = True
-    client = flaskr.app.test_client()
-    with flaskr.app.app_context():
-        flaskr.init_db()
+    db_fd, coinmart.app.config['DATABASE'] = tempfile.mkstemp()
+    coinmart.app.config['TESTING'] = True
+    client = coinmart.app.test_client()
+    with coinmart.app.app_context():
+        coinmart.init_db()
     def teardown():
         os.close(db_fd)
-        os.unlink(flaskr.app.config['DATABASE'])
+        os.unlink(coinmart.app.config['DATABASE'])
     request.addfinalizer(teardown)
     return client
 
@@ -110,8 +110,8 @@ def test_register_password_match(client):
 
 
 def test_registered_users(client):
-    rv = login(client, flaskr.app.config['USERNAME'],
-               flaskr.app.config['PASSWORD'])
+    rv = login(client, coinmart.app.config['USERNAME'],
+               coinmart.app.config['PASSWORD'])
     assert b'Login Success!' in rv.data
     rv = client.post('/register', data=dict(
         username='Test1',
@@ -122,11 +122,27 @@ def test_registered_users(client):
     if __name__ == '__main__':
         assert b'User already registered' in rv.data
 
+
 def test_getExchangeRateIsFloat():
     assert isinstance(getExchangeRate('bitcoin', 'EUR'), float)
+
 
 def test_getExchangeRateComparison():
     assert getExchangeRate('bitcoin', 'EUR') != getExchangeRate('bitcoin', 'AUD')
 
+
 def test_getExchangeRateComparison2():
     assert getExchangeRate('ethereum', 'GBP') != getExchangeRate('bitcoin', 'GBP')
+
+
+def test_user_watchlist(client):
+    with client as c:
+        rv = c.post('/login', data=dict(
+            username='Test',
+            password='Test_123'
+        ), follow_redirects=True)
+    if __name__ == '__main__':
+        assert b'Login Success!' in rv.data
+        assert client.get('/')
+        assert client.show_watchlists()
+

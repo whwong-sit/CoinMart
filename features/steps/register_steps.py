@@ -8,12 +8,11 @@ import time
 @when(u'a user visits the register page')
 def visit_register(context):
     context.browser.get(context.server_address + "/register")
-    time.sleep(1)
 
 
 @then(u'she should see the confirm password field')
 def see_passwordConfirm_field(context):
-    flaskr_found = re.search("Confirm Password:", context.browser.page_source, re.IGNORECASE)
+    flaskr_found = re.search("Confirm your Password", context.browser.page_source, re.IGNORECASE)
     assert flaskr_found
 
 
@@ -66,9 +65,9 @@ def see_register_success(context):
     assert flaskr_found
 
 
-@When(u'she clicks on the Register link')
+@When(u'she clicks on the Sign up link')
 def register_page(context):
-    register_found = context.browser.find_element_by_link_text("sign up")
+    register_found = context.browser.find_element_by_link_text("Sign up")
     register_found.click()
 
 

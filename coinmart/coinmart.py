@@ -8,25 +8,27 @@ import requests
 from flask import Flask, request, session, g, redirect, url_for, abort, \
      render_template, flash
 
-os.environ['FLASK_APP'] = 'flaskr'
+os.environ['FLASK_APP'] = 'coinmart'
 
 app = Flask(__name__) # create the application instance :)
 app.config.from_object(__name__) # load config from this file , CoinMartIndividual.py
 
 # Load default config and override config from an environment variable
 app.config.update(dict(
-    DATABASE=os.path.join(app.root_path, 'flaskr.db'),
+    DATABASE=os.path.join(app.root_path, 'coinmart.db'),
     SECRET_KEY='development key',
     USERNAME='admin',
     PASSWORD='default'
 ))
-app.config.from_envvar('FLASKR_SETTINGS', silent=True)
+app.config.from_envvar('COINMART_SETTINGS', silent=True)
+
 
 def connect_db():
     """Connects to the specific database."""
     rv = sqlite3.connect(app.config['DATABASE'])
     rv.row_factory = sqlite3.Row
     return rv
+
 
 def init_db(schema='schema.sql'):
     db = get_db()
@@ -35,10 +37,10 @@ def init_db(schema='schema.sql'):
     db.commit()
 
 @app.cli.command('initdb')
-
 def initdb_command():
     init_db()
     print('Initialized the database.')
+
 
 def get_db():
     """Opens a new database connection if there is none yet for the
@@ -48,24 +50,34 @@ def get_db():
         g.sqlite_db = connect_db()
     return g.sqlite_db
 
+
 @app.teardown_appcontext
 def close_db(error):
     """Closes the database again at the end of the request."""
     if hasattr(g, 'sqlite_db'):
         g.sqlite_db.close()
 
+
 @app.route('/')
-def show_entries():
+def show_watchlists():
+    user_watchlists = get_user_watchlists()
+    return render_template('dashboard.html', watchlists=user_watchlists)
+
+
+def get_user_watchlists():
     db = get_db()
-    cur = db.execute('select title, text from watchlists order by id desc')
-    entries = cur.fetchall()
-    return render_template('show_entries.html', entries=entries)
+    auth_user = session.get("username")
+    cur = db.execute('select * from user_watchlists, watchlist_items where user_watchlists.watchlist_id = watchlist_items.watchlist_id and user_watchlists.username = "%s"' % auth_user)
+    watchlists = cur.fetchall()
+    return watchlists
+
 
 def query_db(query, args=(), one=False):
     cur = get_db().execute(query, args)
     rv = cur.fetchall()
     cur.close()
     return (rv[0] if rv else None) if one else rv
+
 
 @app.route('/add', methods=['POST'])
 def add_watchlist():
@@ -76,6 +88,7 @@ def add_watchlist():
     db.commit()
     flash('New watchlist added')
     return redirect(url_for('show_entries'))
+
 
 def getExchangeRate(currency_1, currency_2):
     currency_convert_from = currency_1
@@ -90,6 +103,7 @@ def getExchangeRate(currency_1, currency_2):
     json_convert_price = json_data[0]['price_' + currency_convert_to_lowercase]
     price = float(json_convert_price)
     return price
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -107,20 +121,24 @@ def login():
             rows2 = cur2.fetchone()
             if rows or rows1:
                 session['logged_in'] = True
+                session['username'] = user
                 flash("Login Success!")
-                return render_template('show_entries.html')
+                user_watchlists = get_user_watchlists()
+                return render_template('dashboard.html', watchlists=user_watchlists)
             elif user not in rows2:
               error = 'User not registered'
             else:
               error = 'Incorrect username or password'
     return render_template('login.html', error=error)
 
+
 @app.route('/logout')
 def logout():
     session.pop('logged_in', None)
     flash('You were logged out')
     time.sleep(1)
-    return redirect(url_for('show_entries'))
+    return redirect(url_for('show_watchlists'))
+
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -149,8 +167,9 @@ def register():
             get_db().commit()
             session['logged_in'] = True
             flash('You were successfully registered and have been logged in')
-            return redirect(url_for('show_entries'))
+            return redirect(url_for('show_watchlists'))
     return render_template('register.html', error=error)
+
 
 @app.route('/shutdown')
 def shutdown():
@@ -158,32 +177,35 @@ def shutdown():
         shutdown_server()
     return "Server shutdown"
 
+
 @app.cli.command('start')
 def start():
     app.config.from_object(__name__) # load config from this file
 
     app.config.update(dict(
-        DATABASE=os.path.join(app.root_path, 'flaskr.db'),
+        DATABASE=os.path.join(app.root_path, 'coinmart.db'),
         SECRET_KEY='Production key',
     ))
-    app.config.from_envvar('FLASKR_SETTINGS',  silent=True)
+    app.config.from_envvar('COINMART_SETTINGS',  silent=True)
     app.run(port=5000)
+
 
 def test_server():
     ### Setup for integration testing
     app.config.from_object(__name__) # load config from this file
 
     app.config.update(dict(
-        DATABASE=os.path.join(app.root_path, 'flaskr_test.db'),
+        DATABASE=os.path.join(app.root_path, 'coinmart_test.db'),
         SECRET_KEY='Test key',
         SERVER_NAME='localhost:5006',
         # DEBUG=True, # does not work from behave
     ))
-    app.config.from_envvar('FLASKR_TEST_SETTINGS',  silent=True)
+    app.config.from_envvar('COINMART_TEST_SETTINGS',  silent=True)
     app.environment = 'test'
     with app.app_context():
         init_db('test_schema.sql')
     app.run()
+
 
 def shutdown_server():
     func = request.environ.get('werkzeug.server.shutdown')

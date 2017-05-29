@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+{% block body %}
+  {% if session.logged_in%}
+       <h4><strong>My Watchlists</strong></h4>
+       <ul class=watchlists>
+          {% for watchlist in watchlists %}
+            <li><h6>Cryptocurrency : {{ watchlist.cryptocurrency }}</h6>
+                <h6>Currency : {{ watchlist.currency }}</h6>
+                <h6>Value : {{ watchlist.value }}</h6>
+          {% else %}
+            <li><em>Unbelievable. No watchlist created so far</em>
+          {% endfor %}
+      </ul>
+  {% endif %}
+{% endblock %}
+
+
