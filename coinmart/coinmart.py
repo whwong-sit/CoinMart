@@ -89,6 +89,18 @@ def add_watchlist():
     flash('New watchlist added')
     return redirect(url_for('show_entries'))
 
+def getUpdatedWatchlistExchanges():
+    curr_watchlists = get_user_watchlists()
+    for i in range(len(curr_watchlists)):
+        new_exchangeRate = getExchangeRate(curr_watchlists[i][1], curr_watchlists[i][4])
+        db = get_db()
+        auth_user = session.get("username")
+        watchlist_id = db.execute('select watchlist_id from user_watchlists where user_watchlists.username = "%s"' % auth_user).fetchall()[i][0]
+        db.execute('update watchlist_items set value = (?) where watchlist_items.watchlist_id = (?)', [new_exchangeRate, watchlist_id])
+        cur = db.execute('select * from user_watchlists, watchlist_items where user_watchlists.watchlist_id = watchlist_items.watchlist_id and user_watchlists.username = "%s"' % auth_user)
+        updated_watchlists = cur.fetchall()
+        db.commit()
+    return updated_watchlists
 
 def getExchangeRate(currency_1, currency_2):
     currency_convert_from = currency_1
@@ -123,6 +135,7 @@ def login():
                 session['logged_in'] = True
                 session['username'] = user
                 flash("Login Success!")
+                getUpdatedWatchlistExchanges()
                 user_watchlists = get_user_watchlists()
                 return render_template('dashboard.html', watchlists=user_watchlists)
             elif user not in rows2:
