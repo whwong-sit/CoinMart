@@ -4,6 +4,7 @@ import sqlite3
 import re
 import time
 import requests
+from time import strftime
 
 from flask import Flask, request, session, g, redirect, url_for, abort, \
      render_template, flash
@@ -92,19 +93,20 @@ def add_watchlist():
 def getUpdatedWatchlistExchanges():
     curr_watchlists = get_user_watchlists()
     for i in range(len(curr_watchlists)):
-        new_exchangeRate = getExchangeRate(curr_watchlists[i][1], curr_watchlists[i][4])
+        new_exchangeRate = exchange_rate(curr_watchlists[i][1], curr_watchlists[i][4])[0]
+        new_timeStamp = exchange_rate(curr_watchlists[i][1], curr_watchlists[i][4])[1]
         db = get_db()
         auth_user = session.get("username")
         watchlist_id = db.execute('select watchlist_id from user_watchlists where user_watchlists.username = "%s"' % auth_user).fetchall()[i][0]
-        db.execute('update watchlist_items set value = (?) where watchlist_items.watchlist_id = (?)', [new_exchangeRate, watchlist_id])
+        db.execute('update watchlist_items set value = (?), time_stamp = (?) where watchlist_items.watchlist_id = (?)', [new_exchangeRate, new_timeStamp, watchlist_id])
         cur = db.execute('select * from user_watchlists, watchlist_items where user_watchlists.watchlist_id = watchlist_items.watchlist_id and user_watchlists.username = "%s"' % auth_user)
         updated_watchlists = cur.fetchall()
         db.commit()
     return updated_watchlists
 
-def getExchangeRate(currency_1, currency_2):
-    currency_convert_from = currency_1
-    currency_convert_to = currency_2
+def exchange_rate(crypto_currency, monetary_currency):
+    currency_convert_from = crypto_currency
+    currency_convert_to = monetary_currency
     currency_convert_to_lowercase = currency_convert_to.lower()
 
     main_api = 'https://api.coinmarketcap.com/v1/ticker/'
@@ -114,8 +116,20 @@ def getExchangeRate(currency_1, currency_2):
     json_data = requests.get(url).json()
     json_convert_price = json_data[0]['price_' + currency_convert_to_lowercase]
     price = float(json_convert_price)
-    return price
+    date_time = strftime("%dth %b %Y %r")
+    return price, date_time
 
+def crypto_currency_list():
+    main_api = 'https://api.coinmarketcap.com/v1/ticker/'
+    json_data = requests.get(main_api).json()
+    crypto_list = []
+    for data in json_data:
+        crypto_list.append(data['id'])
+    return crypto_list
+
+def monetary_currency_list():
+    monetary_list = ["USD", "AUD", "BRL", "CAD", "CHF", "CNY", "EUR", "GBP", "HKD", "IDR", "INR", "JPY", "KRW", "MXN", "RUB"]
+    return monetary_list
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
