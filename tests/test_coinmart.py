@@ -115,18 +115,21 @@ def test_registered_users(client):
 
 def test_exchange_rate_is_float():
     with coinmart.app.app_context():
-        a, b = coinmart.exchange_rate('bitcoin', 'EUR')
-        assert isinstance(a, float)
+        price, date_time = coinmart.exchange_rate('bitcoin', 'EUR')
+        assert isinstance(price, float)
+        assert isinstance(date_time, str)
 
 
 def test_exchange_rate_comparison():
     with coinmart.app.app_context():
         assert coinmart.exchange_rate('bitcoin', 'EUR') != coinmart.exchange_rate('bitcoin', 'AUD')
-
-
-def test_exchange_rate_comparison2():
-    with coinmart.app.app_context():
         assert coinmart.exchange_rate('ethereum', 'GBP') != coinmart.exchange_rate('bitcoin', 'GBP')
+
+
+def test_currency_list():
+    with coinmart.app.app_context():
+        assert coinmart.monetary_currency_list()
+        assert coinmart.crypto_currency_list()
 
 
 def test_user_watchlist(client):
