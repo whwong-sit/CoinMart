@@ -21,7 +21,7 @@ create table watchlist_items(
   cryptocurrency text,
   currency text,
   value real not null,
-  time_stamp timestamp not null,
+  time_stamp text not null,
   foreign key(watchlist_id) references user_watchlists(watchlist_id),
   primary key(watchlist_id,cryptocurrency,currency)
 );
@@ -32,7 +32,7 @@ create table historical_watchlist_data(
   cryptocurrency text,
   currency text,
   value real not null,
-  time_stamp timestamp not null,
+  time_stamp text not null,
   foreign key(watchlist_id) references user_watchlists(watchlist_id),
   primary key(watchlist_id,cryptocurrency,currency)
 );

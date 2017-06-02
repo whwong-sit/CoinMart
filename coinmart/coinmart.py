@@ -68,7 +68,7 @@ def show_watchlists():
 def get_user_watchlists():
     db = get_db()
     auth_user = session.get("username")
-    cur = db.execute('select * from user_watchlists, watchlist_items where user_watchlists.watchlist_id = watchlist_items.watchlist_id and user_watchlists.username = "%s"' % auth_user)
+    cur = db.execute('select * from user_watchlists, watchlist_items, historical_watchlist_data where user_watchlists.watchlist_id = watchlist_items.watchlist_id and user_watchlists.watchlist_id = historical_watchlist_data.watchlist_id and user_watchlists.username = "%s"' % auth_user)
     watchlists = cur.fetchall()
     return watchlists
 
@@ -90,6 +90,18 @@ def add_watchlist():
     flash('New watchlist added')
     return redirect(url_for('show_entries'))
 
+def PushExchToHistorical():
+    watchlists = get_user_watchlists()
+    for i in range(len(watchlists)):
+        watchlist_id = watchlists[i][2]
+        cryptocurrency = watchlists[i][3]
+        currency = watchlists[i][4]
+        value = watchlists[i][5]
+        time_stamp = watchlists[i][6]
+        db = get_db()
+        db.execute('update historical_watchlist_data set old_value = (?), old_time_stamp = (?) where historical_watchlist_data.watchlist_id = (?) and historical_watchlist_data.cryptocurrency = (?) and historical_watchlist_data.currency = (?)', [value, time_stamp, watchlist_id, cryptocurrency, currency])
+        db.commit()
+
 def getUpdatedWatchlistExchanges():
     curr_watchlists = get_user_watchlists()
     for i in range(len(curr_watchlists)):
@@ -99,10 +111,7 @@ def getUpdatedWatchlistExchanges():
         auth_user = session.get("username")
         watchlist_id = db.execute('select watchlist_id from user_watchlists where user_watchlists.username = "%s"' % auth_user).fetchall()[i][0]
         db.execute('update watchlist_items set value = (?), time_stamp = (?) where watchlist_items.watchlist_id = (?)', [new_exchangeRate, new_timeStamp, watchlist_id])
-        cur = db.execute('select * from user_watchlists, watchlist_items where user_watchlists.watchlist_id = watchlist_items.watchlist_id and user_watchlists.username = "%s"' % auth_user)
-        updated_watchlists = cur.fetchall()
         db.commit()
-    return updated_watchlists
 
 def exchange_rate(crypto_currency, monetary_currency):
     currency_convert_from = crypto_currency
@@ -149,6 +158,7 @@ def login():
                 session['logged_in'] = True
                 session['username'] = user
                 flash("Login Success!")
+                PushExchToHistorical()
                 getUpdatedWatchlistExchanges()
                 user_watchlists = get_user_watchlists()
                 return render_template('dashboard.html', watchlists=user_watchlists)
