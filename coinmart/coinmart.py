@@ -4,6 +4,7 @@ import sqlite3
 import re
 import time
 import requests
+from time import strftime
 
 from flask import Flask, request, session, g, redirect, url_for, abort, \
      render_template, flash
@@ -67,7 +68,7 @@ def show_watchlists():
 def get_user_watchlists():
     db = get_db()
     auth_user = session.get("username")
-    cur = db.execute('select * from user_watchlists, watchlist_items where user_watchlists.watchlist_id = watchlist_items.watchlist_id and user_watchlists.username = "%s"' % auth_user)
+    cur = db.execute('select user_watchlists.username, user_watchlists.watchlist_id, watchlist_items.cryptocurrency, watchlist_items.currency, watchlist_items.current_value, historical_watchlist_data.old_value, historical_watchlist_data.old_time from user_watchlists, watchlist_items, historical_watchlist_data where user_watchlists.watchlist_id = watchlist_items.watchlist_id and user_watchlists.watchlist_id = historical_watchlist_data.watchlist_id and user_watchlists.username = "%s"' % auth_user)
     watchlists = cur.fetchall()
     return watchlists
 
@@ -90,9 +91,9 @@ def add_watchlist():
     return redirect(url_for('show_entries'))
 
 
-def getExchangeRate(currency_1, currency_2):
-    currency_convert_from = currency_1
-    currency_convert_to = currency_2
+def exchange_rate(crypto_currency, monetary_currency):
+    currency_convert_from = crypto_currency
+    currency_convert_to = monetary_currency
     currency_convert_to_lowercase = currency_convert_to.lower()
 
     main_api = 'https://api.coinmarketcap.com/v1/ticker/'
@@ -102,7 +103,22 @@ def getExchangeRate(currency_1, currency_2):
     json_data = requests.get(url).json()
     json_convert_price = json_data[0]['price_' + currency_convert_to_lowercase]
     price = float(json_convert_price)
-    return price
+    date_time = strftime("%dth %b %Y %r")
+    return price, date_time
+
+
+def crypto_currency_list():
+    main_api = 'https://api.coinmarketcap.com/v1/ticker/'
+    json_data = requests.get(main_api).json()
+    crypto_list = []
+    for data in json_data:
+        crypto_list.append(data['id'])
+    return crypto_list
+
+
+def monetary_currency_list():
+    monetary_list = ["USD", "AUD", "BRL", "CAD", "CHF", "CNY", "EUR", "GBP", "HKD", "IDR", "INR", "JPY", "KRW", "MXN", "RUB"]
+    return monetary_list
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -187,7 +203,7 @@ def start():
         SECRET_KEY='Production key',
     ))
     app.config.from_envvar('COINMART_SETTINGS',  silent=True)
-    app.run(port=5000)
+    app.run(port=5003)
 
 
 def test_server():
