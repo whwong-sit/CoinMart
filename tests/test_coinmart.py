@@ -58,6 +58,17 @@ def test_login_incorrect_credentials(client):
     if __name__ == '__main__':
         assert b'Incorrect username or password' in rv.data
 
+def test_update_exchanges(client):
+    with client as c:
+        rv = login(client, 'Test', 'Test_123')
+        cryptocurrency_visible = b'Cryptocurrency :' in rv.data
+        currency_visible = b'Currency :' in rv.data
+        value_visible = b'Value :' in rv.data
+        timestamp_visible = b'Timestamp :' in rv.data
+        old_value_visible = b'Last Value :' in rv.data
+        old_timestamp_visible = b'Last Timestamp :' in rv.data
+        watchlist_visible = (cryptocurrency_visible and currency_visible and value_visible and timestamp_visible and old_value_visible and old_timestamp_visible)
+        assert watchlist_visible
 
 def test_register_login(client):
     with client as c:

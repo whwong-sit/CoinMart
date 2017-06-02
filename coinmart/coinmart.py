@@ -125,7 +125,7 @@ def exchange_rate(crypto_currency, monetary_currency):
     json_data = requests.get(url).json()
     json_convert_price = json_data[0]['price_' + currency_convert_to_lowercase]
     price = float(json_convert_price)
-    date_time = strftime("%dth %b %Y %r")
+    date_time = strftime("%d %b %Y %r")
     return price, date_time
 
 def crypto_currency_list():
