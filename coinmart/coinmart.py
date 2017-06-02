@@ -67,7 +67,7 @@ def show_watchlists():
 def get_user_watchlists():
     db = get_db()
     auth_user = session.get("username")
-    cur = db.execute('select * from user_watchlists, watchlist_items where user_watchlists.watchlist_id = watchlist_items.watchlist_id and user_watchlists.username = "%s"' % auth_user)
+    cur = db.execute('select user_watchlists.username, user_watchlists.watchlist_id, watchlist_items.cryptocurrency, watchlist_items.currency, watchlist_items.current_value, historical_watchlist_data.old_value, historical_watchlist_data.old_time from user_watchlists, watchlist_items, historical_watchlist_data where user_watchlists.watchlist_id = watchlist_items.watchlist_id and user_watchlists.watchlist_id = historical_watchlist_data.watchlist_id and user_watchlists.username = "%s"' % auth_user)
     watchlists = cur.fetchall()
     return watchlists
 
@@ -187,7 +187,7 @@ def start():
         SECRET_KEY='Production key',
     ))
     app.config.from_envvar('COINMART_SETTINGS',  silent=True)
-    app.run(port=5000)
+    app.run(port=5003)
 
 
 def test_server():
