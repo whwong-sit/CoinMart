@@ -21,8 +21,9 @@ def see(context):
 def enter_add_new(context):
     my_lists = context.browser.find_element_by_id("My lists")
     my_lists.click()
-    add = context.browser.find_element_by_id("add")
-    add.click()
+    # add = context.browser.find_element_by_id("add")
+    # add.click()
+    context.browser.get(context.server_address + "/add")
 
 @then(u'she would enter the new watchlist page')
 def enter_addpage(context):

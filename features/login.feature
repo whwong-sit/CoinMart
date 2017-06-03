@@ -1,4 +1,4 @@
-#Feature: Login Page
+Feature: Login Page
 
   Scenario: Login
     Given a user visits the site
