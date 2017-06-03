@@ -11,8 +11,9 @@
                      {% for watchlist in watchlists %}
                           <a id=delete_{{watchlist.watchlist_id}}_{{watchlist.currency2}}  action="{{ url_for('delete') }}" method=GET  href="{{ url_for('delete') }}?name={{ watchlist.watchlist_id}} {{watchlist.currency2}}" class="list-group-item"style="font-size:20px;text-align:left;" >{{ watchlist.watchlist_id}}   {{watchlist.currency2}}</a>
                      {%endfor%}
-                  </div>
                 <a id="add" name="add" href="{{ url_for('add_watchlist') }}" class="list-group-item" style="font-size:28px;text-align:center;">+</a>
+                  </div>
+
             </ul>
         </div>
 
