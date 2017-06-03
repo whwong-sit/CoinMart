@@ -60,17 +60,33 @@ def close_db(error):
 
 @app.route('/')
 def show_watchlists():
-    user_watchlists = get_user_watchlists()
+    # user_watchlists = get_user_watchlists()
+    user_watchlists = get_userwatchlists()
     return render_template('dashboard.html', watchlists=user_watchlists)
 
 
 def get_user_watchlists():
     db = get_db()
     auth_user = session.get("username")
-    cur = db.execute('select * from user_watchlists, watchlist_items where user_watchlists.watchlist_id = watchlist_items.watchlist_id and user_watchlists.username = "%s"' % auth_user)
+    cur = db.execute('select * from userwatchlists, watchlist_items where userwatchlists.currency2 =watchlist_items.currency and userwatchlists.watchlist_id = watchlist_items.watchlist_id and userwatchlists.username = "%s"' % auth_user)
     watchlists = cur.fetchall()
     return watchlists
 
+
+def get_userwatchlists():
+    db = get_db()
+    auth_user = session.get("username")
+    cur = db.execute('select * from userwatchlists, watchlist_items where  userwatchlists.currency2 =watchlist_items.currency and userwatchlists.watchlist_id = watchlist_items.watchlist_id and userwatchlists.username = "%s"' % auth_user)
+    watchlists = cur.fetchall()
+    return watchlists
+
+
+def delete_userwatchlists(name,currency1,currency2):
+    db = get_db()
+    cur = db.execute('DELETE FROM userwatchlists where userwatchlists.username = ? and userwatchlists.watchlist_id = ? and userwatchlists.currency2 = ?',[name,currency1,currency2])
+    db.commit()
+    cur.fetchall()
+    cur.close()
 
 def query_db(query, args=(), one=False):
     cur = get_db().execute(query, args)
@@ -79,15 +95,22 @@ def query_db(query, args=(), one=False):
     return (rv[0] if rv else None) if one else rv
 
 
-@app.route('/add', methods=['POST'])
+@app.route('/add', methods=['GET', 'POST'])
 def add_watchlist():
     if not session['logged_in']:
         abort(401)
-    db=get_db()
-    db.execute("insert into watchlists(title,text) values (?,?)", [request.form['title'], request.form['text']])
-    db.commit()
-    flash('New watchlist added')
-    return redirect(url_for('show_entries'))
+    else:
+        if request.method == 'POST':
+            currency1 = request.form['currency1']
+            currency2 = request.form['currency2']
+            db = get_db()
+            db.execute("INSERT INTO userwatchlists(username,watchlist_id,currency2) VALUES (?,?,?)", [session['username'],currency1,currency2])
+            db.commit()
+            flash('New watchlist added')
+            user_watchlists = get_userwatchlists()
+            return render_template('dashboard.html',watchlists=user_watchlists)
+    return render_template("watchlist.html")
+
 
 
 def getExchangeRate(currency_1, currency_2):
@@ -104,6 +127,16 @@ def getExchangeRate(currency_1, currency_2):
     price = float(json_convert_price)
     return price
 
+@app.route('/delete', methods=['GET', 'POST'])
+def delete():
+    if not session['logged_in']:
+        abort(401)
+    else:
+        currency = request.args.get("name").split(" ")
+        delete_userwatchlists(session['username'], currency[0], currency[1])
+    user_watchlists=get_user_watchlists()
+    flash("delete Success!")
+    return render_template('dashboard.html', watchlists=user_watchlists)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -123,7 +156,8 @@ def login():
                 session['logged_in'] = True
                 session['username'] = user
                 flash("Login Success!")
-                user_watchlists = get_user_watchlists()
+                # user_watchlists = get_user_watchlists()
+                user_watchlists = get_userwatchlists()
                 return render_template('dashboard.html', watchlists=user_watchlists)
             elif user not in rows2:
               error = 'User not registered'
@@ -217,4 +251,6 @@ def shutdown_server():
 
 
 if __name__ == '__main__':
-    start()
+    # start()
+    # initdb_command()
+    app.run(port=5050)

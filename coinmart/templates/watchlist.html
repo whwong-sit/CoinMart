@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+{% block body %}
+  <h2>New Watchlist</h2>
+  {% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
+
+    <div class="container">
+            <div id="watchlist">
+                <form  action="{{ url_for('add_watchlist') }}" method=post class="col-xs-12 col-md-offset-6">
+                  <label >cryptocurrency</label><label>Currency</label>
+                    <dt>
+                      <select name="currency1" >
+                        <option id=0 value="0">select</option>
+                        <option id=bitcoin value="bitcoin">bitcoin</option>
+                        <option id=ethereum  value="ethereum">ethereum</option>
+                        <option id=ripple value="ripple">ripple</option>
+                        <option id=litecoin value="litecoin">litecoin</option>
+                        <option id=Dash value="Dash">Dash</option>
+                        <option id=Monero value="Monero">Monero</option>
+                        <option id=Waves value="Waves">Waves</option>
+                        <option id=Bytecoin value="Bytecoin">Bytecoin</option>
+                      </select>
+                        &nbsp;
+                      <select name="currency2">
+                        <option id=1 value="0"> select</option>
+                        <option id=EUR value="EUR">EUR</option>
+                        <option id=USD value="USD">USD</option>
+                        <option id=CNY value="CNY">CNY</option>
+                        <option id=GBP value="GBP">GBP</option>
+                        <option id=BRL value="BRL">BRL</option>
+                        <option id=JNY value="JNY">JNY</option>
+                        <option id=AUD value="AUD">AUD</option>
+                      </select>
+                    <br><input id=confirm align ="center" type=submit name="btn_login" value=confirm />
+                </form><!-- form -->
+
+            </div><!-- content -->
+    </div><!-- container -->
+{% endblock %}
+
+
