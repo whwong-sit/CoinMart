@@ -67,7 +67,7 @@ def see_register_success(context):
 
 @When(u'she clicks on the Sign up link')
 def register_page(context):
-    register_found = context.browser.find_element_by_link_text("Sign up")
+    register_found = context.browser.find_element_by_link_text("Sign Up")
     register_found.click()
 
 

@@ -35,6 +35,17 @@
 	<link href='https://fonts.googleapis.com/css?family=Droid+Serif:700,400' rel='stylesheet' />
 	<link rel="alternate" type="application/rss+xml" title="RSS" href="" />
 
+    <script>
+        var tables = document.getElementsByClassName('myLists');
+        var table = tables[tables.length - 1];
+        var rows = table.rows;
+        for(var i = 0, td; i < rows.length; i++){
+            td = document.createElement('td');
+            td.appendChild(document.createTextNode(i + 1));
+            rows[i].insertBefore(td, rows[i].firstChild);
+        }
+    </script>
+
 </head>
 <body>
 
@@ -65,30 +76,9 @@
     </nav>
 </div>
 
-
-
  <div class=page>
   {% for message in get_flashed_messages() %}
-    <div class=flash>{{ message }}</div>
+    <div class=flash style="font-size: medium">{{ message }}</div>
   {% endfor %}
   {% block body %}{% endblock %}
 </div>
-{##}
-{#    <div class="container">#}
-{#      <div class="header clearfix">#}
-{#        <nav>#}
-{#          <ul class="nav nav-pills pull-right">#}
-{#            <li role="presentation" ><a href="{{ url_for('show_watchlists') }}">Home</a></li>#}
-{#            <li role="presentation"><a href="{{ url_for('register') }}">Sign up</a></li>#}
-{#              {% if not session.logged_in %}#}
-{#                <li role="presentation"><a href=" {{url_for('login') }}">log in</a></li>#}
-{#              {% else %}#}
-{#                <li role="presentation" name=logout_link><a href="{{ url_for('logout') }}">log out</a ></li>#}
-{#              {% endif %}#}
-{#          </ul>#}
-{#        </nav>#}
-{##}
-{#      </div>#}
-{#     <h1 id="text-muted">Coin Mart</h1>#}
-{##}
-

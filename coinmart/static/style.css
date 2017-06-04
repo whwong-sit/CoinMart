@@ -16,6 +16,7 @@ body {
 	margin: 0 auto;
 	padding: 0;
 	position: relative;
+	counter-reset: Serial;
 }
 h1{ font-size:28px; font-family: monospace}
 h2{ font-size:26px;}
@@ -210,6 +211,10 @@ h1,h2 {
 	margin-top: 50px;
     text-align: center;
 }
+
+.th{
+	width:10%;
+}
 #text-muted {font-size:5em;color:lightslategray;}
 #btn-login {text-align: center; align-content: center;padding-left: 25px;}
 
@@ -278,6 +283,7 @@ h1,h2 {
   margin: 0;
   padding: 0;
 }
+
 
   .myLists li {
 	  display: inline-block;
