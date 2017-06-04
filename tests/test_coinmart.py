@@ -61,6 +61,7 @@ def test_login_incorrect_credentials(client):
 def test_update_exchanges(client):
     with client as c:
         rv = login(client, 'Test', 'Test_123')
+    if __name__ == '__main__':
         cryptocurrency_visible = b'Cryptocurrency :' in rv.data
         currency_visible = b'Currency :' in rv.data
         value_visible = b'Value :' in rv.data
