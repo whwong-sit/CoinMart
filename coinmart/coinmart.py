@@ -177,6 +177,8 @@ def login():
                 session['logged_in'] = True
                 session['username'] = user
                 flash("Login Success!")
+                PushExchToHistorical()
+                getUpdatedWatchlistExchanges()
                 user_watchlists = get_user_watchlists()
                 return render_template('dashboard.html', watchlists=user_watchlists)
             elif user not in rows2:
