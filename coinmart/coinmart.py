@@ -4,6 +4,7 @@ import sqlite3
 import re
 import time
 import requests
+from time import strftime
 
 from flask import Flask, request, session, g, redirect, url_for, abort, \
      render_template, flash
@@ -79,20 +80,30 @@ def query_db(query, args=(), one=False):
     return (rv[0] if rv else None) if one else rv
 
 
-@app.route('/add', methods=['POST'])
-def add_watchlist():
+def add_watchlist(cryptocurrencyid, currency):
+    auth_user = session.get("username")
+    watchlistinfo = exchange_rate(cryptocurrencyid,currency)
     if not session['logged_in']:
         abort(401)
     db=get_db()
-    db.execute("insert into watchlists(title,text) values (?,?)", [request.form['title'], request.form['text']])
+    db.execute("insert into user_watchlists(username, watchlist_id) values (?,?)", [auth_user, cryptocurrencyid])
+    db.execute("insert into watchlist_items(watchlist_id,cryptocurrency,currency,current_value,current_time) values (?,?,?,?,?)",
+               [cryptocurrencyid, watchlistinfo.name, currency, watchlistinfo.price, watchlistinfo.date_time])
+    cursor = db.execute("select * from historical_watchlist_data, watchlist_items where historical_watchlist_data.old_time <> watchlist_items.current_time and historical_watchlist_data.watchlist_id = watchlist_items.watchlist_id and "
+                        "historical_watchlist_data.cryptocurrency = watchlist_items.cryptocurrency and historical_watchlist_data.currency = watchlist_items.currency")
+    if len(cursor.fetchall())> 0 :
+        db.execute(
+            "insert into historical_watchlist_data(watchlist_id,cryptocurrency,currency,old_value,old_time) values (?,?,?,?,?)",
+            [cryptocurrencyid, watchlistinfo.name, currency, watchlistinfo.price, watchlistinfo.date_time])
     db.commit()
     flash('New watchlist added')
-    return redirect(url_for('show_entries'))
+    return redirect(url_for('show_watchlists'))
 
 
-def getExchangeRate(currency_1, currency_2):
-    currency_convert_from = currency_1
-    currency_convert_to = currency_2
+def exchange_rate(crypto_currency, monetary_currency):
+    data = []
+    currency_convert_from = crypto_currency
+    currency_convert_to = monetary_currency
     currency_convert_to_lowercase = currency_convert_to.lower()
 
     main_api = 'https://api.coinmarketcap.com/v1/ticker/'
@@ -102,7 +113,25 @@ def getExchangeRate(currency_1, currency_2):
     json_data = requests.get(url).json()
     json_convert_price = json_data[0]['price_' + currency_convert_to_lowercase]
     price = float(json_convert_price)
-    return price
+    date_time = strftime("%dth %b %Y %r")
+    data.append(json_data.name)
+    data.append(price)
+    data.append(date_time)
+    return data
+
+
+def crypto_currency_list():
+    main_api = 'https://api.coinmarketcap.com/v1/ticker/'
+    json_data = requests.get(main_api).json()
+    crypto_list = []
+    for data in json_data:
+        crypto_list.append(data['id'])
+    return crypto_list
+
+
+def monetary_currency_list():
+    monetary_list = ["USD", "AUD", "BRL", "CAD", "CHF", "CNY", "EUR", "GBP", "HKD", "IDR", "INR", "JPY", "KRW", "MXN", "RUB"]
+    return monetary_list
 
 
 @app.route('/login', methods=['GET', 'POST'])

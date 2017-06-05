@@ -4,7 +4,6 @@ import pytest
 import coinmart
 from coinmart import coinmart
 import tempfile
-import requests
 
 
 @pytest.fixture
@@ -31,21 +30,10 @@ def login(client, username, password):
 def logout(client):
     return client.get('/logout', follow_redirects=True)
 
-def getExchangeRate(currency_1, currency_2):
-    currency_2_lowercase = currency_2.lower()
-    main_api = 'https://api.coinmarketcap.com/v1/ticker/'
-    search_currency = currency_1 + '/?convert=' + currency_2
-    url = main_api + search_currency
-    json_data = requests.get(url).json()
-    json_convert_price = json_data[0]['price_' + currency_2_lowercase]
-    price = float(json_convert_price)
-    return price
-
 def test_empty_db(client):
     rv = client.get('/')
     if __name__ == '__main__':
         assert b'Unbelievable. No watchlist created so far' in rv.data
-
 
 def test_login_logout(client):
     rv = login(client, 'admin', 'default')
@@ -71,9 +59,9 @@ def test_login_incorrect_credentials(client):
 
 def test_register_login(client):
     with client as c:
-        rv = login(client, 'admin', 'default')
+        rv = login(c, 'admin', 'default')
         assert b'Login Success!' in rv.data
-        rv = client.post('/register', data=dict(
+        rv = c.post('/register', data=dict(
             username='Test',
             password='Hema7067',
             email='Test@yahoo.com',
@@ -122,19 +110,6 @@ def test_registered_users(client):
     if __name__ == '__main__':
         assert b'User already registered' in rv.data
 
-
-def test_getExchangeRateIsFloat():
-    assert isinstance(getExchangeRate('bitcoin', 'EUR'), float)
-
-
-def test_getExchangeRateComparison():
-    assert getExchangeRate('bitcoin', 'EUR') != getExchangeRate('bitcoin', 'AUD')
-
-
-def test_getExchangeRateComparison2():
-    assert getExchangeRate('ethereum', 'GBP') != getExchangeRate('bitcoin', 'GBP')
-
-
 def test_user_watchlist(client):
     with client as c:
         rv = c.post('/login', data=dict(
@@ -146,3 +121,14 @@ def test_user_watchlist(client):
         assert client.get('/')
         assert client.show_watchlists()
 
+def test_add_watchlist(client):
+    with client as c:
+        rv = c.post('/login', data=dict(
+            username='Test',
+            password='Test_123'
+        ), follow_redirects=True)
+    if __name__ == '__main__':
+        client.add_watchlist('bitcoin', 'EUR')
+        assert b'New watchlist added' in rv.data
+        assert client.get('/')
+        assert client.show_watchlists()
