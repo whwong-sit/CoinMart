@@ -242,7 +242,7 @@ def start():
         SECRET_KEY='Production key',
     ))
     app.config.from_envvar('COINMART_SETTINGS',  silent=True)
-    app.run(port=5002)
+    app.run(port=5003)
 
 
 def test_server():
