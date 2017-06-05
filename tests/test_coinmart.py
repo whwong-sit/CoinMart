@@ -1,10 +1,12 @@
 # coding=utf-8
 import os
 import pytest
-import coinmart
 from coinmart import coinmart
 import tempfile
 import requests
+import unittest
+
+from flask import request
 
 
 @pytest.fixture
@@ -134,6 +136,27 @@ def test_getExchangeRateComparison():
 def test_getExchangeRateComparison2():
     assert getExchangeRate('ethereum', 'GBP') != getExchangeRate('bitcoin', 'GBP')
 
+def test_add_watchlist(client):
+    rv = login(client, 'admin', 'default')
+    assert b'Login Success!' in rv.data
+    rv = client.post('/add', data=dict(
+        currency1='bitcoin',
+        currency2='EUR'
+    ), follow_redirects=True)
+    if __name__ == '__main__':
+        assert b'New watchlist added' in rv.data
+
+def test_delete_watchlist(client):
+    rv = login(client, 'admin', 'default')
+    assert b'Login Success!' in rv.data
+    rv = client.post('/add', data=dict(
+        currency1='bitcoin',
+        currency2='EUR'
+    ), follow_redirects=True)
+    assert b'New watchlist added' in rv.data
+    rv = client.get('/delete?name=bitcoin EUR')
+    if __name__ == '__main__':
+        assert b'delete Success!' in rv.data
 
 def test_user_watchlist(client):
     with client as c:
