@@ -68,7 +68,7 @@ def show_watchlists():
 def get_user_watchlists():
     db = get_db()
     auth_user = session.get("username")
-    cur = db.execute('select * from user_watchlists, watchlist_items, historical_watchlist_data where user_watchlists.watchlist_id = watchlist_items.watchlist_id and user_watchlists.watchlist_id = historical_watchlist_data.watchlist_id and user_watchlists.username = "%s"' % auth_user)
+    cur = db.execute('select user_watchlists.username, user_watchlists.watchlist_id, watchlist_items.cryptocurrency, watchlist_items.currency, watchlist_items.current_value, watchlist_items.time_stamp, historical_watchlist_data.old_value, historical_watchlist_data.old_time from user_watchlists, watchlist_items, historical_watchlist_data where user_watchlists.watchlist_id = watchlist_items.watchlist_id and user_watchlists.watchlist_id = historical_watchlist_data.watchlist_id and user_watchlists.username = "%s"' % auth_user)
     watchlists = cur.fetchall()
     return watchlists
 
@@ -80,40 +80,50 @@ def query_db(query, args=(), one=False):
     return (rv[0] if rv else None) if one else rv
 
 
-@app.route('/add', methods=['POST'])
-def add_watchlist():
+def add_watchlist(cryptocurrencyid, currency):
+    auth_user = session.get("username")
+    watchlistinfo = exchange_rate(cryptocurrencyid,currency)
     if not session['logged_in']:
         abort(401)
     db=get_db()
-    db.execute("insert into watchlists(title,text) values (?,?)", [request.form['title'], request.form['text']])
+    db.execute("insert into user_watchlists(username, watchlist_id) values (?,?)", [auth_user, cryptocurrencyid])
+    db.execute("insert into watchlist_items(watchlist_id,cryptocurrency,currency,current_value,current_time) values (?,?,?,?,?)",
+               [cryptocurrencyid, watchlistinfo['crypto_currency'], currency, watchlistinfo['price'], watchlistinfo['date_time']])
+    cursor = db.execute("select * from historical_watchlist_data, watchlist_items where historical_watchlist_data.old_time <> watchlist_items.current_time and historical_watchlist_data.watchlist_id = watchlist_items.watchlist_id and "
+                        "historical_watchlist_data.cryptocurrency = watchlist_items.cryptocurrency and historical_watchlist_data.currency = watchlist_items.currency")
+    if len(cursor.fetchall())> 0 :
+        db.execute(
+            "insert into historical_watchlist_data(watchlist_id,cryptocurrency,currency,old_value,old_time) values (?,?,?,?,?)",
+            [cryptocurrencyid, watchlistinfo['crypto_currency'], currency, watchlistinfo['price'], watchlistinfo['date_time']])
     db.commit()
     flash('New watchlist added')
-    return redirect(url_for('show_entries'))
-
-def PushExchToHistorical():
-    watchlists = get_user_watchlists()
-    for i in range(len(watchlists)):
-        watchlist_id = watchlists[i][2]
-        cryptocurrency = watchlists[i][3]
-        currency = watchlists[i][4]
-        value = watchlists[i][5]
-        time_stamp = watchlists[i][6]
-        db = get_db()
-        db.execute('update historical_watchlist_data set old_value = (?), old_time_stamp = (?) where historical_watchlist_data.watchlist_id = (?) and historical_watchlist_data.cryptocurrency = (?) and historical_watchlist_data.currency = (?)', [value, time_stamp, watchlist_id, cryptocurrency, currency])
-        db.commit()
+    return redirect(url_for('show_watchlists'))
 
 def getUpdatedWatchlistExchanges():
     curr_watchlists = get_user_watchlists()
     for i in range(len(curr_watchlists)):
-        new_exchangeRate = exchange_rate(curr_watchlists[i][1], curr_watchlists[i][4])[0]
-        new_timeStamp = exchange_rate(curr_watchlists[i][1], curr_watchlists[i][4])[1]
+        new_exchangeRate = exchange_rate(curr_watchlists[i]['cryptocurrency'], curr_watchlists[i]['currency'])['price']
+        new_timeStamp = exchange_rate(curr_watchlists[i]['cryptocurrency'], curr_watchlists[i]['currency'])['date_time']
         db = get_db()
         auth_user = session.get("username")
         watchlist_id = db.execute('select watchlist_id from user_watchlists where user_watchlists.username = "%s"' % auth_user).fetchall()[i][0]
-        db.execute('update watchlist_items set value = (?), time_stamp = (?) where watchlist_items.watchlist_id = (?)', [new_exchangeRate, new_timeStamp, watchlist_id])
+        db.execute('update watchlist_items set current_value = (?), time_stamp = (?) where watchlist_items.watchlist_id = (?)', [new_exchangeRate, new_timeStamp, watchlist_id])
+        db.commit()
+
+def PushExchToHistorical():
+    watchlists = get_user_watchlists()
+    for i in range(len(watchlists)):
+        watchlist_id = watchlists[i][1]
+        cryptocurrency = watchlists[i][2]
+        currency = watchlists[i][3]
+        value = watchlists[i][4]
+        time_stamp = watchlists[i][5]
+        db = get_db()
+        db.execute('update historical_watchlist_data set old_value = (?), old_time = (?) where historical_watchlist_data.watchlist_id = (?) and historical_watchlist_data.cryptocurrency = (?) and historical_watchlist_data.currency = (?)', [value, time_stamp, watchlist_id, cryptocurrency, currency])
         db.commit()
 
 def exchange_rate(crypto_currency, monetary_currency):
+    data = {}
     currency_convert_from = crypto_currency
     currency_convert_to = monetary_currency
     currency_convert_to_lowercase = currency_convert_to.lower()
@@ -125,8 +135,14 @@ def exchange_rate(crypto_currency, monetary_currency):
     json_data = requests.get(url).json()
     json_convert_price = json_data[0]['price_' + currency_convert_to_lowercase]
     price = float(json_convert_price)
-    date_time = strftime("%d %b %Y %r")
-    return price, date_time
+    date_time = strftime("%dth %b %Y %r")
+
+    data['cypto_currency'] = json_data[0]['name']
+    data['monetary_currency'] = currency_convert_to_lowercase
+    data['price'] = price
+    data['date_time'] = date_time
+    return data
+
 
 def crypto_currency_list():
     main_api = 'https://api.coinmarketcap.com/v1/ticker/'
@@ -136,9 +152,11 @@ def crypto_currency_list():
         crypto_list.append(data['id'])
     return crypto_list
 
+
 def monetary_currency_list():
     monetary_list = ["USD", "AUD", "BRL", "CAD", "CHF", "CNY", "EUR", "GBP", "HKD", "IDR", "INR", "JPY", "KRW", "MXN", "RUB"]
     return monetary_list
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -158,9 +176,9 @@ def login():
                 session['logged_in'] = True
                 session['username'] = user
                 flash("Login Success!")
+                user_watchlists = get_user_watchlists()
                 PushExchToHistorical()
                 getUpdatedWatchlistExchanges()
-                user_watchlists = get_user_watchlists()
                 return render_template('dashboard.html', watchlists=user_watchlists)
             elif user not in rows2:
               error = 'User not registered'
@@ -224,7 +242,7 @@ def start():
         SECRET_KEY='Production key',
     ))
     app.config.from_envvar('COINMART_SETTINGS',  silent=True)
-    app.run(port=5000)
+    app.run(port=5002)
 
 
 def test_server():
