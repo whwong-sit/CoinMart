@@ -88,20 +88,20 @@ def add_watchlist(cryptocurrencyid, currency):
     db=get_db()
     db.execute("insert into user_watchlists(username, watchlist_id) values (?,?)", [auth_user, cryptocurrencyid])
     db.execute("insert into watchlist_items(watchlist_id,cryptocurrency,currency,current_value,current_time) values (?,?,?,?,?)",
-               [cryptocurrencyid, watchlistinfo.name, currency, watchlistinfo.price, watchlistinfo.date_time])
+               [cryptocurrencyid, watchlistinfo['crypto_currency'], currency, watchlistinfo['price'], watchlistinfo['date_time']])
     cursor = db.execute("select * from historical_watchlist_data, watchlist_items where historical_watchlist_data.old_time <> watchlist_items.current_time and historical_watchlist_data.watchlist_id = watchlist_items.watchlist_id and "
                         "historical_watchlist_data.cryptocurrency = watchlist_items.cryptocurrency and historical_watchlist_data.currency = watchlist_items.currency")
     if len(cursor.fetchall())> 0 :
         db.execute(
             "insert into historical_watchlist_data(watchlist_id,cryptocurrency,currency,old_value,old_time) values (?,?,?,?,?)",
-            [cryptocurrencyid, watchlistinfo.name, currency, watchlistinfo.price, watchlistinfo.date_time])
+            [cryptocurrencyid, watchlistinfo['crypto_currency'], currency, watchlistinfo['price'], watchlistinfo['date_time']])
     db.commit()
     flash('New watchlist added')
     return redirect(url_for('show_watchlists'))
 
 
 def exchange_rate(crypto_currency, monetary_currency):
-    data = []
+    data = {}
     currency_convert_from = crypto_currency
     currency_convert_to = monetary_currency
     currency_convert_to_lowercase = currency_convert_to.lower()
@@ -114,9 +114,11 @@ def exchange_rate(crypto_currency, monetary_currency):
     json_convert_price = json_data[0]['price_' + currency_convert_to_lowercase]
     price = float(json_convert_price)
     date_time = strftime("%dth %b %Y %r")
-    data.append(json_data.name)
-    data.append(price)
-    data.append(date_time)
+
+    data['cypto_currency'] = json_data[0]['name']
+    data['monetary_currency'] = currency_convert_to_lowercase
+    data['price'] = price
+    data['date_time'] = date_time
     return data
 
 

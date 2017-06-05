@@ -30,6 +30,7 @@ def login(client, username, password):
 def logout(client):
     return client.get('/logout', follow_redirects=True)
 
+
 def test_empty_db(client):
     rv = client.get('/')
     if __name__ == '__main__':
@@ -110,6 +111,26 @@ def test_registered_users(client):
     if __name__ == '__main__':
         assert b'User already registered' in rv.data
 
+
+def test_exchange_rate_is_float():
+    with coinmart.app.app_context():
+        response = coinmart.exchange_rate('bitcoin', 'EUR')
+        assert isinstance(response['price'], float)
+        assert isinstance(response['date_time'], str)
+
+
+def test_exchange_rate_comparison():
+    with coinmart.app.app_context():
+        assert coinmart.exchange_rate('bitcoin', 'EUR') != coinmart.exchange_rate('bitcoin', 'AUD')
+        assert coinmart.exchange_rate('ethereum', 'GBP') != coinmart.exchange_rate('bitcoin', 'GBP')
+
+
+def test_currency_list():
+    with coinmart.app.app_context():
+        assert coinmart.monetary_currency_list()
+        assert coinmart.crypto_currency_list()
+
+
 def test_user_watchlist(client):
     with client as c:
         rv = c.post('/login', data=dict(
@@ -120,6 +141,7 @@ def test_user_watchlist(client):
         assert b'Login Success!' in rv.data
         assert client.get('/')
         assert client.show_watchlists()
+
 
 def test_add_watchlist(client):
     with client as c:
