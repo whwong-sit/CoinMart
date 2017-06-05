@@ -68,7 +68,7 @@ def show_watchlists():
 def get_user_watchlists():
     db = get_db()
     auth_user = session.get("username")
-    cur = db.execute('select user_watchlists.username, user_watchlists.watchlist_id, watchlist_items.cryptocurrency, watchlist_items.currency, watchlist_items.current_value, watchlist_items.time_stamp, historical_watchlist_data.old_value, historical_watchlist_data.old_time from user_watchlists, watchlist_items, historical_watchlist_data where user_watchlists.watchlist_id = watchlist_items.watchlist_id and user_watchlists.watchlist_id = historical_watchlist_data.watchlist_id and user_watchlists.username = "%s"' % auth_user)
+    cur = db.execute('select user_watchlists.username, user_watchlists.watchlist_id, watchlist_items.cryptocurrency, watchlist_items.currency, watchlist_items.current_value, historical_watchlist_data.old_value, historical_watchlist_data.old_time from user_watchlists, watchlist_items, historical_watchlist_data where user_watchlists.watchlist_id = watchlist_items.watchlist_id and user_watchlists.watchlist_id = historical_watchlist_data.watchlist_id and user_watchlists.username = "%s"' % auth_user)
     watchlists = cur.fetchall()
     return watchlists
 
@@ -99,6 +99,28 @@ def add_watchlist(cryptocurrencyid, currency):
     flash('New watchlist added')
     return redirect(url_for('show_watchlists'))
 
+
+def exchange_rate(crypto_currency, monetary_currency):
+    data = {}
+    currency_convert_from = crypto_currency
+    currency_convert_to = monetary_currency
+    currency_convert_to_lowercase = currency_convert_to.lower()
+
+    main_api = 'https://api.coinmarketcap.com/v1/ticker/'
+    search_currency = currency_convert_from + '/?convert=' + currency_convert_to
+    url = main_api + search_currency
+
+    json_data = requests.get(url).json()
+    json_convert_price = json_data[0]['price_' + currency_convert_to_lowercase]
+    price = float(json_convert_price)
+    date_time = strftime("%dth %b %Y %r")
+
+    data['cypto_currency'] = json_data[0]['name']
+    data['monetary_currency'] = currency_convert_to_lowercase
+    data['price'] = price
+    data['date_time'] = date_time
+    return data
+
 def getUpdatedWatchlistExchanges():
     curr_watchlists = get_user_watchlists()
     for i in range(len(curr_watchlists)):
@@ -121,27 +143,6 @@ def PushExchToHistorical():
         db = get_db()
         db.execute('update historical_watchlist_data set old_value = (?), old_time = (?) where historical_watchlist_data.watchlist_id = (?) and historical_watchlist_data.cryptocurrency = (?) and historical_watchlist_data.currency = (?)', [value, time_stamp, watchlist_id, cryptocurrency, currency])
         db.commit()
-
-def exchange_rate(crypto_currency, monetary_currency):
-    data = {}
-    currency_convert_from = crypto_currency
-    currency_convert_to = monetary_currency
-    currency_convert_to_lowercase = currency_convert_to.lower()
-
-    main_api = 'https://api.coinmarketcap.com/v1/ticker/'
-    search_currency = currency_convert_from + '/?convert=' + currency_convert_to
-    url = main_api + search_currency
-
-    json_data = requests.get(url).json()
-    json_convert_price = json_data[0]['price_' + currency_convert_to_lowercase]
-    price = float(json_convert_price)
-    date_time = strftime("%dth %b %Y %r")
-
-    data['cypto_currency'] = json_data[0]['name']
-    data['monetary_currency'] = currency_convert_to_lowercase
-    data['price'] = price
-    data['date_time'] = date_time
-    return data
 
 
 def crypto_currency_list():
@@ -176,9 +177,9 @@ def login():
                 session['logged_in'] = True
                 session['username'] = user
                 flash("Login Success!")
-                user_watchlists = get_user_watchlists()
                 PushExchToHistorical()
                 getUpdatedWatchlistExchanges()
+                user_watchlists = get_user_watchlists()
                 return render_template('dashboard.html', watchlists=user_watchlists)
             elif user not in rows2:
               error = 'User not registered'

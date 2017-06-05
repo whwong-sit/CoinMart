@@ -1,0 +1,13 @@
+[run]
+parallel=True
+branch=True
+
+include = 
+	coinmart/*
+
+[paths]
+source = 
+	coinmart/
+
+tests = 
+	tests/
