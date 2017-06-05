@@ -4,7 +4,6 @@ import pytest
 import coinmart
 from coinmart import coinmart
 import tempfile
-import requests
 
 
 @pytest.fixture
@@ -31,15 +30,6 @@ def login(client, username, password):
 def logout(client):
     return client.get('/logout', follow_redirects=True)
 
-def getExchangeRate(currency_1, currency_2):
-    currency_2_lowercase = currency_2.lower()
-    main_api = 'https://api.coinmarketcap.com/v1/ticker/'
-    search_currency = currency_1 + '/?convert=' + currency_2
-    url = main_api + search_currency
-    json_data = requests.get(url).json()
-    json_convert_price = json_data[0]['price_' + currency_2_lowercase]
-    price = float(json_convert_price)
-    return price
 
 def test_empty_db(client):
     rv = client.get('/')
@@ -68,6 +58,18 @@ def test_login_incorrect_credentials(client):
     if __name__ == '__main__':
         assert b'Incorrect username or password' in rv.data
 
+def test_update_exchanges(client):
+    with client as c:
+        rv = login(client, 'Test', 'Test_123')
+    if __name__ == '__main__':
+        cryptocurrency_visible = b'Cryptocurrency :' in rv.data
+        currency_visible = b'Currency :' in rv.data
+        value_visible = b'Value :' in rv.data
+        timestamp_visible = b'Timestamp :' in rv.data
+        old_value_visible = b'Last Value :' in rv.data
+        old_timestamp_visible = b'Last Timestamp :' in rv.data
+        watchlist_visible = (cryptocurrency_visible and currency_visible and value_visible and timestamp_visible and old_value_visible and old_timestamp_visible)
+        assert watchlist_visible
 
 def test_register_login(client):
     with client as c:
@@ -123,16 +125,20 @@ def test_registered_users(client):
         assert b'User already registered' in rv.data
 
 
-def test_getExchangeRateIsFloat():
-    assert isinstance(getExchangeRate('bitcoin', 'EUR'), float)
+def test_exchange_rate_is_float():
+    with coinmart.app.app_context():
+        a, b = coinmart.exchange_rate('bitcoin', 'EUR')
+        assert isinstance(a, float)
 
 
-def test_getExchangeRateComparison():
-    assert getExchangeRate('bitcoin', 'EUR') != getExchangeRate('bitcoin', 'AUD')
+def test_exchange_rate_comparison():
+    with coinmart.app.app_context():
+        assert coinmart.exchange_rate('bitcoin', 'EUR') != coinmart.exchange_rate('bitcoin', 'AUD')
 
 
-def test_getExchangeRateComparison2():
-    assert getExchangeRate('ethereum', 'GBP') != getExchangeRate('bitcoin', 'GBP')
+def test_exchange_rate_comparison2():
+    with coinmart.app.app_context():
+        assert coinmart.exchange_rate('ethereum', 'GBP') != coinmart.exchange_rate('bitcoin', 'GBP')
 
 
 def test_user_watchlist(client):

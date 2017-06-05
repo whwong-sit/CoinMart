@@ -11,3 +11,4 @@ Feature: Dashboard Page
     When a user visits the login page
     And she logs in with username "Test" and password "Test_123"
     Then she should see the her list of watchlists
+
