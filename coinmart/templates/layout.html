@@ -2,12 +2,16 @@
 <title>Coin Mart</title>
 <meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
-	<meta name="description" content="The is a portfolio of Azadeh Arnaz, a software developer based in Sydeny, Australia." />
 	<meta name="viewport" content="width=device-width" />
-	<link href="image/favicon.ico" rel="shortcut icon"/>
-	<link rel="stylesheet" href="/stylesheets/bootstrap.css">
-	<link rel="shortcut icon" href="#">
-	<link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script type="text/javascript" src="../static/javascript.js"><</script>
+    <link rel="stylesheet" type=text/css href="../static/style.css?version=45">
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
 	<link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
 	<link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
 	<link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
@@ -30,39 +34,51 @@
 	<link href='https://fonts.googleapis.com/css?family=Lato' rel='stylesheet' type='text/css'>
 	<link href='https://fonts.googleapis.com/css?family=Droid+Serif:700,400' rel='stylesheet' />
 	<link rel="alternate" type="application/rss+xml" title="RSS" href="" />
-<!-- Latest compiled and minified CSS -->
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-{#<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Tangerine">#}
-<!-- Optional theme -->
-{#<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">#}
 
-<!-- Latest compiled and minified JavaScript -->
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-<link rel="stylesheet" type=text/css href="../static/style.css?version=45">
+    <script>
+        var tables = document.getElementsByClassName('myLists');
+        var table = tables[tables.length - 1];
+        var rows = table.rows;
+        for(var i = 0, td; i < rows.length; i++){
+            td = document.createElement('td');
+            td.appendChild(document.createTextNode(i + 1));
+            rows[i].insertBefore(td, rows[i].firstChild);
+        }
+    </script>
 
+</head>
+<body>
 
- <body id="coinmart">
+<body id="coinmart">
+<div class="container-fluid">
+    <nav class="navbar navbar-inverse">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/watchlists">CoinMart</a>
+        </div>
+        <div class="collapse navbar-collapse" id="myNavbar">
+          <ul class="nav navbar-nav navbar-right">
 
-    <div class="container">
-      <div class="header clearfix">
-        <nav>
-          <ul class="nav nav-pills pull-right">
-            <li role="presentation" ><a href="{{ url_for('show_watchlists') }}">Home</a></li>
-            <li role="presentation"><a href="{{ url_for('register') }}">Sign up</a></li>
               {% if not session.logged_in %}
-                <li role="presentation"><a href=" {{url_for('login') }}">log in</a></li>
+                <li role="presentation"><a href=" {{url_for('login') }}"><span class="glyphicon glyphicon-log-in"></span>log in</a></li>
+                  <li><a href="{{ url_for('register') }}"><span class="glyphicon glyphicon-user"></span> Sign Up</a></li>
               {% else %}
                 <li role="presentation" name=logout_link><a href="{{ url_for('logout') }}">log out</a ></li>
               {% endif %}
           </ul>
-        </nav>
-
+        </div>
       </div>
-     <h1 id="text-muted">Coin Mart</h1>
+    </nav>
+</div>
 
-<div class=page>
+ <div class=page>
   {% for message in get_flashed_messages() %}
-    <div class=flash>{{ message }}</div>
+    <div class=flash style="font-size: medium">{{ message }}</div>
   {% endfor %}
   {% block body %}{% endblock %}
 </div>

@@ -1,4 +1,3 @@
-
 Feature: Login Page
 
   Scenario: Login
