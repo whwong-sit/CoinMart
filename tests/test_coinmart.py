@@ -111,6 +111,29 @@ def test_registered_users(client):
     if __name__ == '__main__':
         assert b'User already registered' in rv.data
 
+def test_update_exchanges(client):
+    with client as c:
+        rv = login(client, 'Test', 'Test_123')
+    if __name__ == '__main__':
+        data = coinmart.get_user_watchlists()
+        for i in data:
+            Cryptocurrency = data[i]['cryptocurrency']
+            Currency = data[i]['currency']
+            Curr_Val = data[i]['value']
+            Curr_Timestamp = data[i]['time_stamp']
+            Old_Val = data[i]['old_value']
+            Old_Timestamp = data[i]['old_time_stamp']
+            cryptocurrency_visible = Cryptocurrency in rv.data
+            currency_visible = Currency in rv.data
+            value_visible = Curr_Val in rv.data
+            timestamp_visible = Curr_Timestamp in rv.data
+            old_value_visible = Old_Val in rv.data
+            old_timestamp_visible = Old_Timestamp in rv.data
+            watchlist_visible = (cryptocurrency_visible and currency_visible and value_visible and timestamp_visible and old_value_visible and old_timestamp_visible)
+            if watchlist_visible == False:
+                assert False
+        assert True
+
 
 def test_exchange_rate_is_float():
     with coinmart.app.app_context():
