@@ -1,3 +1,4 @@
+
 drop table if exists users;
 create table users (
   username text primary key,
@@ -6,34 +7,39 @@ create table users (
 );
 
 insert into users values('admin', 'default', 'admin@uni.sydney.edu.au');
+
 drop table if exists user_watchlists;
 create table user_watchlists(
   username text,
-  watchlist_id text,
+  watchlist_name text,
   foreign key(username) references users(username),
-   PRIMARY KEY (username,watchlist_id)
-);
-
-drop table if exists userwatchlists;
-create table userwatchlists(
-  username text,
-  watchlist_id text,
-  currency2 text,
-  foreign key(username) references users(username),
-  PRIMARY KEY (username,watchlist_id,currency2)
+  PRIMARY KEY (username,watchlist_name)
 );
 
 drop table if exists watchlist_items;
 create table watchlist_items(
-  watchlist_id text,
+  username text,
+  watchlist_name text,
   cryptocurrency text,
   currency text,
-  value real not null,
-  foreign key(watchlist_id) references user_watchlists(watchlist_id),
-  PRIMARY KEY (watchlist_id,cryptocurrency,currency)
+  current_value real not null,
+  current_time timestamp not null,
+  foreign key(watchlist_name,username) references user_watchlists(watchlist_name,username),
+  primary key(username,watchlist_name,cryptocurrency,currency)
 );
-insert into watchlist_items values('bitcoin', 'Bitcoin', 'EUR', 1754.22019599);
-insert into watchlist_items values('ripple', 'Ripple', 'EUR', 0.3028863965);
+
+drop table if exists historical_watchlist_data;
+create table historical_watchlist_data(
+  username text,
+  watchlist_name text,
+  cryptocurrency text,
+  currency text,
+  old_value real not null,
+  old_time timestamp not null,
+  foreign key(watchlist_name,username) references user_watchlists(watchlist_name,username),
+  primary key(username,watchlist_name,cryptocurrency,currency)
+);
+
 
 
 
