@@ -136,27 +136,25 @@ def test_getExchangeRateComparison():
 def test_getExchangeRateComparison2():
     assert getExchangeRate('ethereum', 'GBP') != getExchangeRate('bitcoin', 'GBP')
 
-def test_add_watchlist(client):
+def test_create_watchlist(client):
     rv = login(client, 'admin', 'default')
     assert b'Login Success!' in rv.data
-    rv = client.post('/add', data=dict(
-        currency1='bitcoin',
-        currency2='EUR'
+    rv = client.post('/addwatchlist', data=dict(
+        watchlistname="admin",
     ), follow_redirects=True)
     if __name__ == '__main__':
-        assert b'New watchlist added' in rv.data
+        assert b'add watch list Success!' in rv.data
 
 def test_delete_watchlist(client):
     rv = login(client, 'admin', 'default')
     assert b'Login Success!' in rv.data
-    rv = client.post('/add', data=dict(
-        currency1='bitcoin',
-        currency2='EUR'
+    rv = client.post('/addwatchlist', data=dict(
+        watchlistname="admin",
     ), follow_redirects=True)
-    assert b'New watchlist added' in rv.data
-    rv = client.get('/delete?name=bitcoin EUR')
+    assert b'add watch list Success!' in rv.data
+    rv = client.get('/deletewatchlist?name=delete_admin')
     if __name__ == '__main__':
-        assert b'delete Success!' in rv.data
+        assert b'delete watch list Success!' in rv.data
 
 def test_user_watchlist(client):
     with client as c:
@@ -169,3 +167,20 @@ def test_user_watchlist(client):
         assert client.get('/')
         assert client.show_watchlists()
 
+def test_addapair_in_a_watchlist(client):
+    rv = login(client, 'admin', 'default')
+    assert b'Login Success!' in rv.data
+    rv = client.post('/addpair', data=dict(
+        msg="admin bitcoin",
+        currency="EUR"
+    ), follow_redirects=True)
+    if __name__ == '__main__':
+        assert b'New pair added' in rv.data
+
+
+def test_deleteapair_in_a_watchlist(client):
+    rv = login(client, 'admin', 'default')
+    assert b'Login Success!' in rv.data
+    rv = client.get('/deletepair?name=admin_bitcoin_EUR')
+    if __name__ == '__main__':
+        assert b'delete Success!' in rv.data
