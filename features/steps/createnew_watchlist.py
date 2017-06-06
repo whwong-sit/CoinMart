@@ -13,7 +13,7 @@ def see_add(context):
 
 @then(u'she would see a add button and click it')
 def see(context):
-    add_found = context.browser.find_element_by_id('add')
+    add_found = context.browser.find_element_by_id('test')
     add_found.click()
 
 
@@ -25,19 +25,35 @@ def enter_add_new(context):
     # add.click()
     context.browser.get(context.server_address + "/add")
 
-@then(u'she would enter the new watchlist page')
-def enter_addpage(context):
-    pass
 
+@then(u'she would see "Enter a watchlist name"')
+def see_addwatchlist(context):
+    new_found = re.search("Enter a watchlist name", context.browser.page_source, re.IGNORECASE)
+    assert new_found
+
+@then(u'she create a new watch list namely "{admin}"')
+def create_addwatchlist(context,admin):
+    uname = context.browser.find_element_by_name('watchlistname')
+    login_button = context.browser.find_element_by_name('btn_confirm')
+    uname.clear();
+    uname.send_keys(admin)
+    login_button.click()
+@then(u'she should see a message of add watch list Success!')
+def add_successful(context):
+    new_found = re.search("add watch list Success!", context.browser.page_source, re.IGNORECASE)
+    assert new_found
 
 @given (u'a user visits the new watchlist page')
 def add_page(context):
-    pass
+    add_found = context.browser.find_element_by_id("My lists")
+    add_found.click()
+    add_found = context.browser.find_element_by_id("admin")
+    add_found.click()
 
 
-@given(u'she should see the title of New Watchlist')
+@given(u'she should see the title of "admin"')
 def newWatchlist_found(context):
-    new_found = re.search("New Watchlist", context.browser.page_source, re.IGNORECASE)
+    new_found = re.search("admin", context.browser.page_source, re.IGNORECASE)
     assert new_found
 
 
@@ -62,7 +78,7 @@ def choose_currency(context):
     currency.click()
     choose_currency = context.browser.find_element_by_id('EUR')
     choose_currency.click()
-    confirm_button = context.browser.find_element_by_id('confirm')
+    confirm_button = context.browser.find_element_by_id('add')
     confirm_button.click()
 
 @then(u'she choose to add ripple and EUR as a new watchlist')
@@ -75,12 +91,12 @@ def choose_currency(context):
     currency.click()
     choose_currency = context.browser.find_element_by_id('EUR')
     choose_currency.click()
-    confirm_button = context.browser.find_element_by_id('confirm')
+    confirm_button = context.browser.find_element_by_id('add')
     confirm_button.click()
 
-@then(u'she returns to the dashboard and see New watchlist added')
+@then(u'she returns to the dashboard and New pair added')
 def seenew_watchlist(context):
-    currency_found = re.search("New watchlist added", context.browser.page_source, re.IGNORECASE)
+    currency_found = re.search("New pair added", context.browser.page_source, re.IGNORECASE)
     assert currency_found
 
 @then(u'she would see the information at bottom of the table')

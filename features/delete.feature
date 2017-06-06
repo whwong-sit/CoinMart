@@ -1,16 +1,16 @@
 # Created by stn at 2017/5/29
-Feature: delete page
+Feature: delete a pair of currency in watchlist "admin" and delete watchlist namely admin
 
-  Scenario: Login Success
-    Given a user visits the site
-    When a user visits the login page
-    And she logs in with username "admin" and password "default"
-    Then she should see a message of login success
 
-  Scenario: delete watchlist(bitcoin with EUR)
-    When she logs in and clicks My Lists
+  Scenario: delete watchlist pair in watchlist admin(bitcoin with EUR)
+    Given a user visits the watchlist site
     Then she would see a button namely bitcoin EUR and click it
-    And she would delete success
+    And she would see delete success
+
+  Scenario: delete watchlist namely admin
+    When she logs in and clicks My Lists
+    And she would see delete bottom behind admin link and clicks delete
+    Then she would see delete watch list Success!
 
   Scenario: Logout
      Given a user visits the login page
