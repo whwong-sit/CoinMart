@@ -296,10 +296,11 @@ h1,h2 {
 	margin: 0 auto;
 	padding: 25px 0 0;
 	position: absolute;
-	right: 350px;
+	right: 150px;
+	top: 300px;
 	text-align: center;
 	text-shadow: 0 1px 0 #fff;
-	width: 900px;
+	width: 800px;
 }
 #watchlist form input[type="submit"] {
 	background: rgb(254,231,154);
@@ -329,7 +330,7 @@ h1,h2 {
 }
 #watchlist label{
 	font-size:40px;
-	width:300px;
+		width:300px;
 	color:silver }
 #watchlist select{
 	font-size:28px;
