@@ -93,9 +93,7 @@ def exchange_rate(crypto_currency, monetary_currency):
     json_data = requests.get(url).json()
     json_convert_price = json_data[0]['price_' + currency_convert_to_lowercase]
     price = float(json_convert_price)
-    print price
     date_time = time.strftime("%b %d %Y %H:%M:%S")
-    print date_time
     data['cypto_currency'] = json_data[0]['name']
     data['monetary_currency'] = currency_convert_to_lowercase
     data['price'] = price
@@ -201,7 +199,6 @@ def add_watchlist():
             watchlistname = request.form['watchlistname']
             addwatchlist = None
             add_watchlistname(watchlistname)
-            print watchlistname
             flash("add watch list Success!")
     watchlistsname = get_user_watchlistsname()
     return render_template('dashboard.html',watchlistsname=watchlistsname, addwathlist=addwatchlist)
@@ -223,7 +220,6 @@ def delete_pair():
     if not session['logged_in']:
         abort(401)
     meg = request.args.get("name").split("_")
-    print meg
     delete_userwatchlistspair(session['username'],meg[0],meg[1],meg[2])
     flash("delete Success!")
     watchlistsname = get_user_watchlistsname()
