@@ -5,6 +5,7 @@ import re
 import time
 import requests
 from time import strftime
+import datetime
 
 from flask import Flask, request, session, g, redirect, url_for, abort, \
      render_template, flash
@@ -99,6 +100,21 @@ def add_watchlist(cryptocurrencyid, currency):
     flash('New watchlist added')
     return redirect(url_for('show_watchlists'))
 
+def get_previous_exchange_rate(crypto_currency, monetary_currency):
+    data = {}
+    currency_convert_from = crypto_currency
+    currency_convert_to = monetary_currency
+    currency_convert_to_lowercase = currency_convert_to.lower()
+    main_api = 'http://coinmarketcap.northpole.ro/api/v6/history/'
+    search = currency_convert_from + '_2017.json'
+    url = main_api + search
+    json_data = requests.get(url).json()
+    old_exch = json_data['history'][time.strftime("%d-%m-%Y")]['price'][currency_convert_to_lowercase]
+    timestamp = json_data['history'][time.strftime("%d-%m-%Y")]['timestamp']
+    old_time = datetime.datetime.fromtimestamp(int(timestamp)).strftime("%dth %b %Y %r")
+    data['old_exch'] = old_exch
+    data['old_time'] = old_time
+    return data
 
 def exchange_rate(crypto_currency, monetary_currency):
     data = {}
@@ -119,17 +135,24 @@ def exchange_rate(crypto_currency, monetary_currency):
     data['monetary_currency'] = currency_convert_to_lowercase
     data['price'] = price
     data['date_time'] = date_time
+    data['symbol'] = json_data[0]['symbol']
     return data
 
 def getUpdatedWatchlistExchanges():
     curr_watchlists = get_user_watchlists()
     for i in range(len(curr_watchlists)):
-        new_exchangeRate = exchange_rate(curr_watchlists[i]['cryptocurrency'], curr_watchlists[i]['currency'])['price']
-        new_timeStamp = exchange_rate(curr_watchlists[i]['cryptocurrency'], curr_watchlists[i]['currency'])['date_time']
+        cryptocurrency = curr_watchlists[i]['cryptocurrency']
+        currency = curr_watchlists[i]['currency']
+        crypto_code = exchange_rate(cryptocurrency, currency)['symbol']
+        old_exch = get_previous_exchange_rate(crypto_code, currency)['old_exch']
+        old_time = get_previous_exchange_rate(crypto_code, currency)['old_time']
+        new_exchangeRate = exchange_rate(cryptocurrency, currency)['price']
+        new_timeStamp = exchange_rate(cryptocurrency, currency)['date_time']
         db = get_db()
         auth_user = session.get("username")
         watchlist_id = db.execute('select watchlist_id from user_watchlists where user_watchlists.username = "%s"' % auth_user).fetchall()[i][0]
         db.execute('update watchlist_items set current_value = (?), time_stamp = (?) where watchlist_items.watchlist_id = (?)', [new_exchangeRate, new_timeStamp, watchlist_id])
+        db.execute('update historical_watchlist_data set old_value = (?), old_time = (?) where historical_watchlist_data.watchlist_id = (?)', [old_exch, old_time, watchlist_id])
         db.commit()
 
 def PushExchToHistorical():
@@ -177,7 +200,6 @@ def login():
                 session['logged_in'] = True
                 session['username'] = user
                 flash("Login Success!")
-                PushExchToHistorical()
                 getUpdatedWatchlistExchanges()
                 user_watchlists = get_user_watchlists()
                 return render_template('dashboard.html', watchlists=user_watchlists)
