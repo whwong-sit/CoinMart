@@ -111,9 +111,8 @@ def test_registered_users(client):
     if __name__ == '__main__':
         assert b'User already registered' in rv.data
 
-def test_update_exchanges(client):
-    with client as c:
-        rv = login(client, 'Test', 'Test_123')
+def test_exchanges_visible(client):
+    rv = login(client, 'Test', 'Test_123')
     if __name__ == '__main__':
         data = coinmart.get_user_watchlists()
         for i in data:
@@ -134,6 +133,39 @@ def test_update_exchanges(client):
                 assert False
         assert True
 
+def test_curr_exchanges_correct():
+    if __name__ == '__main__':
+        data = coinmart.get_user_watchlists()
+        for i in data:
+            cryptocurrency = data[i]['cryptocurrency']
+            currency = data[i]['currency']
+            curr_exch_rate = coinmart.exchange_rate(cryptocurrency, currency)['price']
+            curr_stored_exch = data[i]['value']
+            if curr_exch_rate != curr_stored_exch:
+                assert False
+        assert True
+
+def test_no_exchanges(client):
+    rv = login(client, 'admin', 'default')
+    if __name__ == '__main__':
+        assert b'Unbelievable. No watchlist created so far' in rv.data
+
+def test_old_exch_correct():
+    if __name__ == '__main__':
+        data = coinmart.get_user_watchlists()
+        for i in data:
+            cryptocurrency = data[i]['cryptocurrency']
+            currency = data[i]['currency']
+            old_stored_exch = data[i]['old_value']
+            old_stored_exch_time = data[i]['old_time']
+            symbol = coinmart.exchange_rate(cryptocurrency, currency)['symbol']
+            old_exch_rate = coinmart.get_previous_exchange_rate(symbol, currency)['old_exch']
+            old_exch_time = coinmart.get_previous_exchange_rate(symbol, currency)['old_time']
+            if old_stored_exch != old_exch_rate:
+                assert False
+            elif old_stored_exch_time != old_exch_time:
+                assert False
+        assert True
 
 def test_exchange_rate_is_float():
     with coinmart.app.app_context():
