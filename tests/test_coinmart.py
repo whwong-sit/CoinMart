@@ -173,6 +173,25 @@ def test_exchange_rate_is_float():
         assert isinstance(response['price'], float)
         assert isinstance(response['date_time'], str)
 
+def test_old_exchange_rate_is_float():
+    with coinmart.app.app_context():
+        response = coinmart.get_previous_exchange_rate('BTC', 'EUR')
+        assert isinstance(response['old_exch'], float)
+        assert isinstance(response['old_time'], str)
+
+def test_exchanges_update():
+    if __name__ == '__main__':
+        database = coinmart.get_user_watchlists()
+        old_exchanges = {}
+        for i in database:
+            old_exchanges[i['watchlist_id']] = i['current_value']
+        new_exchanges = coinmart.getUpdatedWatchlistExchanges()['new_exch_list']
+        for i in old_exchanges:
+            if old_exchanges[i] == new_exchanges[i]:
+                assert False
+        assert True
+
+
 
 def test_exchange_rate_comparison():
     with coinmart.app.app_context():

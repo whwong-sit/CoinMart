@@ -139,21 +139,29 @@ def exchange_rate(crypto_currency, monetary_currency):
     return data
 
 def getUpdatedWatchlistExchanges():
+    old_exch_list = {}
+    new_exch_list = {}
     curr_watchlists = get_user_watchlists()
     for i in range(len(curr_watchlists)):
+        watchlist_id = curr_watchlists[i]['watchlist_id']
         cryptocurrency = curr_watchlists[i]['cryptocurrency']
         currency = curr_watchlists[i]['currency']
         crypto_code = exchange_rate(cryptocurrency, currency)['symbol']
         old_exch = get_previous_exchange_rate(crypto_code, currency)['old_exch']
         old_time = get_previous_exchange_rate(crypto_code, currency)['old_time']
+        old_exch_pair = {old_exch:old_time}
+        old_exch_list[watchlist_id] = old_exch_pair
         new_exchangeRate = exchange_rate(cryptocurrency, currency)['price']
         new_timeStamp = exchange_rate(cryptocurrency, currency)['date_time']
+        new_exch_pair = {new_exchangeRate:new_timeStamp}
+        new_exch_list[watchlist_id] = new_exch_pair
         db = get_db()
         auth_user = session.get("username")
         watchlist_id = db.execute('select watchlist_id from user_watchlists where user_watchlists.username = "%s"' % auth_user).fetchall()[i][0]
         db.execute('update watchlist_items set current_value = (?), time_stamp = (?) where watchlist_items.watchlist_id = (?)', [new_exchangeRate, new_timeStamp, watchlist_id])
         db.execute('update historical_watchlist_data set old_value = (?), old_time = (?) where historical_watchlist_data.watchlist_id = (?)', [old_exch, old_time, watchlist_id])
         db.commit()
+    return old_exch_list, new_exch_list
 
 
 def crypto_currency_list():
