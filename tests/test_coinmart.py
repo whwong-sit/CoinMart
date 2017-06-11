@@ -76,7 +76,7 @@ def test_register_invalid_password(client):
     rv = login(client, 'admin', 'default')
     assert b'Login Success!' in rv.data
     rv = client.post('/register', data=dict(
-        username='test',
+        username='Test1',
         password='test',
         email='test@yahoo.com',
         cfm_password='test'
@@ -85,11 +85,11 @@ def test_register_invalid_password(client):
         assert b'Invalid password. Passwords must contain at least 8 characters, and at least one capital letter and number' in rv.data
 
 
-def test_register_password_match(client):
+def test_register_passwords_dont_match(client):
     rv = login(client, 'admin', 'default')
     assert b'Login Success!' in rv.data
     rv = client.post('/register', data=dict(
-        username='Test',
+        username='Test2',
         password='Svalli30',
         email='test@yahoo.com',
         cfm_password='Svalli301'
@@ -97,6 +97,23 @@ def test_register_password_match(client):
     if __name__ == '__main__':
         assert b'Passwords do not match' in rv.data
 
+def test_register_no_numbers(client):
+    rv = client.post('/register', data=dict(
+        username='Test3',
+        password='Svalli',
+        email='test@yahoo.com',
+        cfm_password='Svalli'
+    ), follow_redirects=True)
+    assert b'Invalid password. Passwords must contain at least 8 characters, and at least one capital letter and number' in rv.data
+
+def test_register_no_capitals(client):
+    rv = client.post('/register', data=dict(
+        username='Test4',
+        password='87980',
+        email='test@yahoo.com',
+        cfm_password='87980'
+    ), follow_redirects=True)
+    assert b'Invalid password. Passwords must contain at least 8 characters, and at least one capital letter and number' in rv.data
 
 def test_registered_users(client):
     rv = login(client, coinmart.app.config['USERNAME'],
@@ -110,6 +127,22 @@ def test_registered_users(client):
     ), follow_redirects=True)
     if __name__ == '__main__':
         assert b'User already registered' in rv.data
+
+def test_user_ready_registered(client):
+    rv = client.post('/register', data=dict(
+        username='Test1',
+        password='Hema7067',
+        email='test@yahoo.com',
+        cfm_password='Hema7067'
+    ), follow_redirects=True)
+    rv = logout(client)
+    rv = client.post('/register', data=dict(
+        username = 'Test1',
+        password = 'Hema7067',
+        email = 'test@yahoo.com',
+        cfm_password = 'Hema7067'
+        ), follow_redirects=True)
+    assert b'User already registered' in rv.data
 
 def test_exchanges_visible(client):
     rv = login(client, 'Test', 'Test_123')
@@ -130,18 +163,6 @@ def test_exchanges_visible(client):
             old_timestamp_visible = Old_Timestamp in rv.data
             watchlist_visible = (cryptocurrency_visible and currency_visible and value_visible and timestamp_visible and old_value_visible and old_timestamp_visible)
             if watchlist_visible == False:
-                assert False
-        assert True
-
-def test_curr_exchanges_correct():
-    if __name__ == '__main__':
-        data = coinmart.get_user_watchlists()
-        for i in data:
-            cryptocurrency = data[i]['cryptocurrency']
-            currency = data[i]['currency']
-            curr_exch_rate = coinmart.exchange_rate(cryptocurrency, currency)['price']
-            curr_stored_exch = data[i]['value']
-            if curr_exch_rate != curr_stored_exch:
                 assert False
         assert True
 
@@ -167,6 +188,16 @@ def test_old_exch_correct():
                 assert False
         assert True
 
+def test_add_watchlist(client):
+    with client as c:
+        rv = c.post('/login', data=dict(
+            username='Test',
+            password='Test_123'
+        ), follow_redirects=True)
+    if __name__ == '__main__':
+        coinmart.add_watchlist("Ripple", "USD")
+        assert b'Ripple' and b'USD' in rv.data
+
 def test_exchange_rate_is_float():
     with coinmart.app.app_context():
         response = coinmart.exchange_rate('bitcoin', 'EUR')
@@ -179,14 +210,6 @@ def test_old_exchange_rate_is_float():
         assert isinstance(response['old_exch'], float)
         assert isinstance(response['old_time'], str)
 
-def test_exchanges_update():
-    if __name__ == '__main__':
-        new_exchanges = coinmart.getUpdatedWatchlistExchanges()['new_exch_list']
-        for i in new_exchanges:
-            if new_exchanges[i][0] != coinmart.exchange_rate(i[1], i[2]):
-                assert False
-        assert True
-
 
 def test_exchange_rate_comparison():
     with coinmart.app.app_context():
@@ -198,6 +221,24 @@ def test_currency_list():
     with coinmart.app.app_context():
         assert coinmart.monetary_currency_list()
         assert coinmart.crypto_currency_list()
+
+def test_exchanges_update_correct(client):
+    with client as c:
+        rv = c.post('/login', data=dict(
+            username='Test',
+            password='Test_123'
+        ), follow_redirects=True)
+    if __name__ == '__main__':
+        client.getUpdatedWatchlistExchanges()
+        data = client.get_user_watchlists()
+        for i in data:
+            cryptocurrency = data[i]['cryptocurrency']
+            currency = data[i]['currency']
+            curr_exch_rate = client.exchange_rate(cryptocurrency, currency)['price']
+            curr_stored_exch = data[i]['value']
+            if curr_exch_rate != curr_stored_exch:
+                assert False
+        assert True
 
 
 def test_user_watchlist(client):
