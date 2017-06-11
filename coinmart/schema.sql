@@ -30,6 +30,7 @@ create table watchlist_items(
 
 drop table if exists historical_watchlist_data;
 create table historical_watchlist_data(
+
   username text,
   watchlist_name text,
   cryptocurrency text,

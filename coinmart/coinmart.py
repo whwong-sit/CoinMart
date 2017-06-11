@@ -4,6 +4,7 @@ import sqlite3
 import re
 import time
 import requests
+from time import strftime
 
 from flask import Flask, request, session, g, redirect, url_for, abort, \
      render_template, flash
@@ -91,6 +92,7 @@ def exchange_rate(crypto_currency, monetary_currency):
     search_currency = currency_convert_from + '/?convert=' + currency_convert_to
     url = main_api + search_currency
     json_data = requests.get(url).json()
+
     json_convert_price = json_data[0]['price_' + currency_convert_to_lowercase]
     price = float(json_convert_price)
     date_time = time.strftime("%b %d %Y %H:%M:%S")
@@ -142,7 +144,6 @@ def query_db(query, args=(), one=False):
     cur.close()
     return (rv[0] if rv else None) if one else rv
 
-
 def add_watchlistname(watchlist_name):
     auth_user = session.get("username")
     if not session['logged_in']:
@@ -151,9 +152,9 @@ def add_watchlistname(watchlist_name):
     db.execute("insert into user_watchlists(username, watchlist_name) values (?,?)", [auth_user, watchlist_name])
     db.commit()
 
-
 def add_watchlist_pair_method(watchlistname,cryptocurrencyid,currency):
     auth_user = session.get("username")
+
     watchlistinfo = exchange_rate(cryptocurrencyid,currency)
     if not session['logged_in']:
         abort(401)
@@ -169,6 +170,25 @@ def add_watchlist_pair_method(watchlistname,cryptocurrencyid,currency):
     db.commit()
     flash('New pair added')
 
+def add_watchlist(cryptocurrencyid, currency):
+    auth_user = session.get("username")
+    watchlistinfo = exchange_rate(cryptocurrencyid,currency)
+    if not session['logged_in']:
+        abort(401)
+    db=get_db()
+    db.execute("insert into user_watchlists(username, watchlist_id) values (?,?)", [auth_user, cryptocurrencyid])
+    db.execute("insert into watchlist_items(watchlist_id,cryptocurrency,currency,current_value,current_time) values (?,?,?,?,?)",
+               [cryptocurrencyid, watchlistinfo['crypto_currency'], currency, watchlistinfo['price'], watchlistinfo['date_time']])
+    cursor = db.execute("select * from historical_watchlist_data, watchlist_items where historical_watchlist_data.old_time <> watchlist_items.current_time and historical_watchlist_data.watchlist_id = watchlist_items.watchlist_id and "
+                        "historical_watchlist_data.cryptocurrency = watchlist_items.cryptocurrency and historical_watchlist_data.currency = watchlist_items.currency")
+    if len(cursor.fetchall())> 0 :
+        db.execute(
+            "insert into historical_watchlist_data(watchlist_id,cryptocurrency,currency,old_value,old_time) values (?,?,?,?,?)",
+            [cryptocurrencyid, watchlistinfo['crypto_currency'], currency, watchlistinfo['price'], watchlistinfo['date_time']])
+    db.commit()
+    flash('New watchlist added')
+    return redirect(url_for('show_watchlists'))
+
 
 @app.route('/addpair', methods=['GET', 'POST'])
 def add_watchlist_pair():
@@ -180,6 +200,7 @@ def add_watchlist_pair():
             cryptocurrencyid=msg[0]
             currency = request.form['currency']
             showwatchlist=msg[1]
+
             add_watchlist_pair_method(showwatchlist,cryptocurrencyid,currency)
         else:
             showwatchlist = request.args.get("name")
@@ -226,7 +247,30 @@ def delete_pair():
     user_watchlist = get_user_watchlists(meg[0])
     showwatchlist=meg[0]
     return render_template("dashboard.html", watchlistsname=watchlistsname, watchlists=user_watchlist,showwatchlist=showwatchlist)
+    json_data = requests.get(url).json()
+    json_convert_price = json_data[0]['price_' + currency_convert_to_lowercase]
+    price = float(json_convert_price)
+    date_time = strftime("%dth %b %Y %r")
 
+    data['cypto_currency'] = json_data[0]['name']
+    data['monetary_currency'] = currency_convert_to_lowercase
+    data['price'] = price
+    data['date_time'] = date_time
+    return data
+
+
+def crypto_currency_list():
+    main_api = 'https://api.coinmarketcap.com/v1/ticker/'
+    json_data = requests.get(main_api).json()
+    crypto_list = []
+    for data in json_data:
+        crypto_list.append(data['id'])
+    return crypto_list
+
+
+def monetary_currency_list():
+    monetary_list = ["USD", "AUD", "BRL", "CAD", "CHF", "CNY", "EUR", "GBP", "HKD", "IDR", "INR", "JPY", "KRW", "MXN", "RUB"]
+    return monetary_list
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -310,7 +354,7 @@ def start():
         SECRET_KEY='Production key',
     ))
     app.config.from_envvar('COINMART_SETTINGS',  silent=True)
-    app.run(port=5000)
+    app.run(port=5003)
 
 
 def test_server():

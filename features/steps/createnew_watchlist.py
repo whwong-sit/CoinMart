@@ -45,10 +45,8 @@ def add_successful(context):
 
 @given (u'a user visits the new watchlist page')
 def add_page(context):
-    add_found = context.browser.find_element_by_id("My lists")
-    add_found.click()
-    add_found = context.browser.find_element_by_id("admin")
-    add_found.click()
+
+    context.browser.get(context.server_address + "/addpair?name=admin")
 
 
 @given(u'she should see the title of "admin"')
