@@ -100,18 +100,18 @@ def test_register_passwords_dont_match(client):
 def test_register_no_numbers(client):
     rv = client.post('/register', data=dict(
         username='Test3',
-        password='Svalli',
+        password='Password',
         email='test@yahoo.com',
-        cfm_password='Svalli'
+        cfm_password='Password'
     ), follow_redirects=True)
     assert b'Invalid password. Passwords must contain at least 8 characters, and at least one capital letter and number' in rv.data
 
 def test_register_no_capitals(client):
     rv = client.post('/register', data=dict(
         username='Test4',
-        password='87980',
+        password='password32',
         email='test@yahoo.com',
-        cfm_password='87980'
+        cfm_password='password32'
     ), follow_redirects=True)
     assert b'Invalid password. Passwords must contain at least 8 characters, and at least one capital letter and number' in rv.data
 
@@ -231,14 +231,15 @@ def test_exchanges_update_correct(client):
     if __name__ == '__main__':
         client.getUpdatedWatchlistExchanges()
         data = client.get_user_watchlists()
-        for i in data:
+        for i in range(len(data)):
             cryptocurrency = data[i]['cryptocurrency']
             currency = data[i]['currency']
             curr_exch_rate = client.exchange_rate(cryptocurrency, currency)['price']
             curr_stored_exch = data[i]['value']
-            if curr_exch_rate != curr_stored_exch:
+            if curr_exch_rate == curr_stored_exch:
+                assert True
+            else:
                 assert False
-        assert True
 
 
 def test_user_watchlist(client):
