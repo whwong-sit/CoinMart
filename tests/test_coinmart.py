@@ -111,12 +111,81 @@ def test_registered_users(client):
     if __name__ == '__main__':
         assert b'User already registered' in rv.data
 
+def test_exchanges_visible(client):
+    rv = login(client, 'Test', 'Test_123')
+    if __name__ == '__main__':
+        data = coinmart.get_user_watchlists()
+        for i in data:
+            Cryptocurrency = data[i]['cryptocurrency']
+            Currency = data[i]['currency']
+            Curr_Val = data[i]['value']
+            Curr_Timestamp = data[i]['time_stamp']
+            Old_Val = data[i]['old_value']
+            Old_Timestamp = data[i]['old_time_stamp']
+            cryptocurrency_visible = Cryptocurrency in rv.data
+            currency_visible = Currency in rv.data
+            value_visible = Curr_Val in rv.data
+            timestamp_visible = Curr_Timestamp in rv.data
+            old_value_visible = Old_Val in rv.data
+            old_timestamp_visible = Old_Timestamp in rv.data
+            watchlist_visible = (cryptocurrency_visible and currency_visible and value_visible and timestamp_visible and old_value_visible and old_timestamp_visible)
+            if watchlist_visible == False:
+                assert False
+        assert True
+
+def test_curr_exchanges_correct():
+    if __name__ == '__main__':
+        data = coinmart.get_user_watchlists()
+        for i in data:
+            cryptocurrency = data[i]['cryptocurrency']
+            currency = data[i]['currency']
+            curr_exch_rate = coinmart.exchange_rate(cryptocurrency, currency)['price']
+            curr_stored_exch = data[i]['value']
+            if curr_exch_rate != curr_stored_exch:
+                assert False
+        assert True
+
+def test_no_exchanges(client):
+    rv = login(client, 'admin', 'default')
+    if __name__ == '__main__':
+        assert b'Unbelievable. No watchlist created so far' in rv.data
+
+def test_old_exch_correct():
+    if __name__ == '__main__':
+        data = coinmart.get_user_watchlists()
+        for i in data:
+            cryptocurrency = data[i]['cryptocurrency']
+            currency = data[i]['currency']
+            old_stored_exch = data[i]['old_value']
+            old_stored_exch_time = data[i]['old_time']
+            symbol = coinmart.exchange_rate(cryptocurrency, currency)['symbol']
+            old_exch_rate = coinmart.get_previous_exchange_rate(symbol, currency)['old_exch']
+            old_exch_time = coinmart.get_previous_exchange_rate(symbol, currency)['old_time']
+            if old_stored_exch != old_exch_rate:
+                assert False
+            elif old_stored_exch_time != old_exch_time:
+                assert False
+        assert True
 
 def test_exchange_rate_is_float():
     with coinmart.app.app_context():
         response = coinmart.exchange_rate('bitcoin', 'EUR')
         assert isinstance(response['price'], float)
         assert isinstance(response['date_time'], str)
+
+def test_old_exchange_rate_is_float():
+    with coinmart.app.app_context():
+        response = coinmart.get_previous_exchange_rate('BTC', 'EUR')
+        assert isinstance(response['old_exch'], float)
+        assert isinstance(response['old_time'], str)
+
+def test_exchanges_update():
+    if __name__ == '__main__':
+        new_exchanges = coinmart.getUpdatedWatchlistExchanges()['new_exch_list']
+        for i in new_exchanges:
+            if new_exchanges[i][0] != coinmart.exchange_rate(i[1], i[2]):
+                assert False
+        assert True
 
 
 def test_exchange_rate_comparison():
