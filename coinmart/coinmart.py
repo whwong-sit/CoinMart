@@ -150,11 +150,11 @@ def getUpdatedWatchlistExchanges():
         old_exch = get_previous_exchange_rate(crypto_code, currency)['old_exch']
         old_time = get_previous_exchange_rate(crypto_code, currency)['old_time']
         old_exch_pair = {old_exch:old_time}
-        old_exch_list[watchlist_id] = old_exch_pair
+        old_exch_list[[watchlist_id, cryptocurrency, currency]] = old_exch_pair
         new_exchangeRate = exchange_rate(cryptocurrency, currency)['price']
         new_timeStamp = exchange_rate(cryptocurrency, currency)['date_time']
         new_exch_pair = {new_exchangeRate:new_timeStamp}
-        new_exch_list[watchlist_id] = new_exch_pair
+        new_exch_list[[watchlist_id, cryptocurrency, currency]] = new_exch_pair
         db = get_db()
         auth_user = session.get("username")
         watchlist_id = db.execute('select watchlist_id from user_watchlists where user_watchlists.username = "%s"' % auth_user).fetchall()[i][0]

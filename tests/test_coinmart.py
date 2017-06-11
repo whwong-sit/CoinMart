@@ -181,16 +181,11 @@ def test_old_exchange_rate_is_float():
 
 def test_exchanges_update():
     if __name__ == '__main__':
-        database = coinmart.get_user_watchlists()
-        old_exchanges = {}
-        for i in database:
-            old_exchanges[i['watchlist_id']] = i['current_value']
         new_exchanges = coinmart.getUpdatedWatchlistExchanges()['new_exch_list']
-        for i in old_exchanges:
-            if old_exchanges[i] == new_exchanges[i]:
+        for i in new_exchanges:
+            if new_exchanges[i][0] != coinmart.exchange_rate(i[1], i[2]):
                 assert False
         assert True
-
 
 
 def test_exchange_rate_comparison():
