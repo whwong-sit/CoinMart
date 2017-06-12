@@ -144,6 +144,7 @@ def add_watchlist_pair_method(watchlistId,cryptocurrencyid,currency):
     db.execute("insert into watchlist_items(watchlist_id,cryptocurrency,currency,current_value,current_time) values (?,?,?,?,?)",
                [watchlistId,cryptocurrencyid, currency, watchlistinfo['price'], watchlistinfo['date_time']])
     db.commit()
+    flash('New pair added')
 
 
 @app.route('/addpair', methods=['GET', 'POST'])
@@ -183,6 +184,7 @@ def add_watchlist():
 
 @app.route('/deletewatchlist', methods=['GET', 'POST'])
 def delete_watchlist():
+
     meg = request.args.get("name").split("_")
     watchlistID = request.args.get("id")
     delete_watchlist_method(session['username'], meg[1], watchlistID)
@@ -193,6 +195,8 @@ def delete_watchlist():
 
 @app.route('/deletepair', methods=['GET', 'POST'])
 def delete_pair():
+    if not session['logged_in']:
+        abort(401)
     auth_user = session.get("username")
     meg = request.args.get("name").split("_")
     watchlistid = request.args.get("id")

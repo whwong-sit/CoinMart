@@ -3,12 +3,6 @@ import os
 import pytest
 from coinmart import coinmart
 import tempfile
-import requests
-import unittest
-
-
-from flask import request
-from flask import session
 
 
 @pytest.fixture
@@ -34,7 +28,6 @@ def login(client, username, password):
 
 def logout(client):
     return client.get('/logout', follow_redirects=True)
-
 
 def test_empty_db(client):
     rv = client.get('/')
@@ -135,10 +128,13 @@ def test_getExchangeRateComparison2():
 def test_add_watchlist_pair():
     with coinmart.app.app_context():
         coinmart.init_db()
-        coinmart.redirect('/addpair')
         coinmart.get_db()
         coinmart.exchange_rate('bitcoin', 'EUR')
-        assert isinstance(coinmart.add_watchlist_pair_method('1', 'bitcoin', 'EUR'), object)
+        with coinmart.app.test_client() as client:
+          rv = client.post('/addpair?name=bitcoin&id=1')
+          assert isinstance(coinmart.add_watchlist_pair_method('1', 'bitcoin', 'EUR'), object)
+          if __name__ == '__main__':
+            assert b'New pair added' in rv.data
 
 def test_add_watchlist():
     with coinmart.app.app_context():
