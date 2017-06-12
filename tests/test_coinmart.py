@@ -1,9 +1,13 @@
 # coding=utf-8
 import os
 import pytest
-import coinmart
 from coinmart import coinmart
 import tempfile
+import requests
+import unittest
+
+from flask import request
+
 
 
 @pytest.fixture
@@ -130,6 +134,25 @@ def test_currency_list():
         assert coinmart.monetary_currency_list()
         assert coinmart.crypto_currency_list()
 
+def test_create_watchlist(client):
+    rv = login(client, 'admin', 'default')
+    assert b'Login Success!' in rv.data
+    rv = client.post('/addwatchlist', data=dict(
+        watchlistname="admin",
+    ), follow_redirects=True)
+    if __name__ == '__main__':
+        assert b'add watch list Success!' in rv.data
+
+def test_delete_watchlist(client):
+    rv = login(client, 'admin', 'default')
+    assert b'Login Success!' in rv.data
+    rv = client.post('/addwatchlist', data=dict(
+        watchlistname="admin",
+    ), follow_redirects=True)
+    assert b'add watch list Success!' in rv.data
+    rv = client.get('/deletewatchlist?name=delete_admin')
+    if __name__ == '__main__':
+        assert b'delete watch list Success!' in rv.data
 
 def test_user_watchlist(client):
     with client as c:
@@ -143,6 +166,25 @@ def test_user_watchlist(client):
         assert client.show_watchlists()
 
 
+def test_addapair_in_a_watchlist(client):
+    rv = login(client, 'admin', 'default')
+    assert b'Login Success!' in rv.data
+    rv = client.post('/addpair', data=dict(
+        msg="admin bitcoin",
+        currency="EUR"
+    ), follow_redirects=True)
+    if __name__ == '__main__':
+        assert b'New pair added' in rv.data
+
+
+def test_deleteapair_in_a_watchlist(client):
+    rv = login(client, 'admin', 'default')
+    assert b'Login Success!' in rv.data
+    rv = client.get('/deletepair?name=admin_bitcoin_EUR')
+    if __name__ == '__main__':
+        assert b'delete Success!' in rv.data
+
+
 def test_add_watchlist(client):
     with client as c:
         rv = c.post('/login', data=dict(
@@ -154,3 +196,4 @@ def test_add_watchlist(client):
         assert b'New watchlist added' in rv.data
         assert client.get('/')
         assert client.show_watchlists()
+

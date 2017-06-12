@@ -9,9 +9,9 @@ def visit(context):
     context.browser.get(context.home)
 
 
-@then(u'she should see Coin Mart')
+@then(u'she should see CoinMart')
 def see(context):
-    coinmart_found = re.search("Coin Mart", context.browser.page_source, re.IGNORECASE)
+    coinmart_found = re.search("CoinMart", context.browser.page_source, re.IGNORECASE)
     assert coinmart_found
 
 
