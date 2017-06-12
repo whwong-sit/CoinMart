@@ -1,6 +1,4 @@
-
 Feature: Login Page
-
   Scenario: Login
     Given a user visits the site
     When a user visits the login page
@@ -32,8 +30,8 @@ Feature: Login Page
   Scenario: Login Incorrect Login
     Given a user visits the site
     When a user visits the login page
-    And she logs in with username "admin" and password "badpasswd"
-    Then she should see a message of "user not registered"
+    And she logs in with username "Test" and password "test"
+    Then she should see a message of "Incorrect username or password"
 
   Scenario: Logout
      Given a user visits the login page

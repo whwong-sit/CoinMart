@@ -1,18 +1,87 @@
 {% extends "layout.html" %}
 {% block body %}
-  {% if session.logged_in%}
-       <h4><strong>My Watchlists</strong></h4>
-       <ul class=watchlists>
-          {% for watchlist in watchlists %}
-            <li><h6>Cryptocurrency : {{ watchlist.cryptocurrency }}</h6>
-                <h6>Currency : {{ watchlist.currency }}</h6>
-                <h6>Current Value : {{ watchlist.current_value }}</h6>
-                <h6>Historical Value : {{ watchlist.old_value }} - {{ watchlist.old_time}}</h6>
-          {% else %}
-            <li><em>Unbelievable. No watchlist created so far</em>
-          {% endfor %}
-      </ul>
-  {% endif %}
+    {% if session.logged_in%}
+    <div class="container-fluid">
+      <div class="row row-offcanvas row-offcanvas-left">
+        <!-- sidebar -->
+        <div class="col-xs-9 col-sm-3 sidebar-offcanvas" id="sidebar" role="navigation">
+            <ul class="nav">
+              <a id="My lists" name="My Lists" href="#subItems" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#MainMenu">My Lists<i class="fa fa-caret-down"></i></a>
+                    <div  class="collapse" id="subItems">
+                     {% for watchlist in watchlistsname %}
+                        <li  class="list-group-item "><a id={{watchlist.watchlist_name}}  action="{{ url_for('add_watchlist_pair') }}" method=GET  href="{{ url_for('add_watchlist_pair') }}?name={{ watchlist.watchlist_name}}&id={{ watchlist.watchlist_id}}" style="font-size:30px;text-align:left;color: black;width: 100px" >{{ watchlist.watchlist_name}}</a>
+                            <span class="badge"><a id=delete_{{watchlist.watchlist_name}}  action="{{ url_for('delete_watchlist') }}" method=GET  href="{{ url_for('delete_watchlist') }}?name=delete_{{watchlist.watchlist_name}}&id={{watchlist.watchlist_id}}" style="font-size:20px;text-align:right ;width: 60px;color: red" >delete</a></span> </li>
+
+                     {%endfor%}
+                    <a id="test" name="test" href="{{ url_for('add_watchlist') }}" class="list-group-item" style="font-size:28px;text-align:center;">+</a>
+                  </div>
+                    {% if addwathlist %}
+                     <form  action="{{ url_for('add_watchlist') }}" method=post class="list-group-item list-group-item-success">
+                     <li><input type="text" name="watchlistname" placeholder="Enter a watchlist name" required="" id="watchlistname" />
+                        <input id=btn_confirm type=submit name="btn_confirm" value=confirm /></li></form><{% endif %}
+            </ul>
+        </div>
+
+
+ {% if showwatchlist %}
+          <div class="col-xs-9 col-sm-9" style="position:relative">
+             <h1>{{showwatchlist}}</h1>
+                <table class="table table-bordered mylists">
+                    <thead>
+                      <tr>
+                        <th style="width: 5%">Cryptocurrency</th>
+                        <th style="width: 5%">Currency</th>
+                          <th style="width: 5%">current Value</th>
+                          <th style="width: 5%">old Value</th>
+                           <th style="width: 5%">old time</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                    {% for watchlist in watchlists%}
+                        <tr class="list1">
+                          <td style="width: 5%">{{ watchlist.cryptocurrency}}</td>
+                          <td style="width: 5%">{{ watchlist.currency}}</td>
+                            <td style="width: 5%">{{ watchlist.current_value}}</td>
+                            <td style="width: 5%">{{ watchlist.old_value}}</td>
+                            <td style="width: 5%">{{ watchlist.old_time}}</td>
+                            <td style="width: 2%">  <a id=delete_{{watchlist.watchlist_name}}_{{watchlist.cryptocurrency}}_{{watchlist.currency}} action="{{ url_for('delete_pair') }}" method=GET  href="{{ url_for('delete_pair') }}?name={{watchlist.watchlist_name}}_{{watchlist.cryptocurrency}}_{{watchlist.currency}}&id={{watchlist.watchlist_id}} " class="list-group-item"style="font-size:15px;text-align:left;" >delete</a></td>
+                        </tr>
+                  {% endfor %}
+                        <div class="container">
+            <div id="watchlist">
+  <form     action="{{ url_for('add_watchlist_pair') }}" method=post class="col-xs-12 col-md-offset-6">
+                    <dt>
+                      <select name="cryptocurrency" >
+                        <option id=0 value="0">Cryptocurrency</option>
+                        <option id=bitcoin value="bitcoin {{showwatchlist}}">bitcoin</option>
+                        <option id=ethereum  value="ethereum {{showwatchlist}}">ethereum</option>
+                        <option id=ripple value="ripple {{showwatchlist}}">ripple</option>
+                        <option id=litecoin value="litecoin {{showwatchlist}}">litecoin</option>
+                        <option id=Dash value="Dash {{showwatchlist}}">Dash</option>
+                        <option id=Waves value="Waves {{showwatchlist}}">Waves</option>
+                      </select>
+                        &nbsp;
+                      <select name="currency">
+                        <option id=1 value="0"> currency</option>
+                        <option id=EUR value="EUR">EUR</option>
+                        <option id=USD value="USD">USD</option>
+                        <option id=CNY value="CNY">CNY</option>
+                        <option id=GBP value="GBP">GBP</option>
+                        <option id=AUD value="AUD">AUD</option>
+                      </select>
+                    <input id=add align ="center" type=submit name=add   value=add />
+                </form><!-- form -->
+
+            </div><!-- content -->
+    </div><!-- container -->
+                  </tbody>
+
+                </table>
+          </div>
+      </div>
+    </div>
+{%  endif %}
+{%  endif %}
 {% endblock %}
 
 
