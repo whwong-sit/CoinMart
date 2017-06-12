@@ -151,7 +151,7 @@ def getUpdatedWatchlistExchanges():
         db = get_db()
         auth_user = session.get("username")
         watchlist_id = db.execute('select watchlist_id from user_watchlists where user_watchlists.username = "%s"' % auth_user).fetchall()[i][0]
-        db.execute('update watchlist_items set current_value = (?), time_stamp = (?) where watchlist_items.watchlist_id = (?)', [new_exchangeRate, new_timeStamp, watchlist_id])
+        db.execute('update watchlist_items set current_value = (?), current_time = (?) where watchlist_items.watchlist_id = (?)', [new_exchangeRate, new_timeStamp, watchlist_id])
         db.execute('update historical_watchlist_data set old_value = (?), old_time = (?) where historical_watchlist_data.watchlist_id = (?)', [old_exch, old_time, watchlist_id])
         db.commit()
 

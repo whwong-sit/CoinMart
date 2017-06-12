@@ -151,10 +151,10 @@ def test_exchanges_visible(client):
         for i in data:
             Cryptocurrency = data[i]['cryptocurrency']
             Currency = data[i]['currency']
-            Curr_Val = data[i]['value']
-            Curr_Timestamp = data[i]['time_stamp']
+            Curr_Val = data[i]['current_value']
+            Curr_Timestamp = data[i]['current_time']
             Old_Val = data[i]['old_value']
-            Old_Timestamp = data[i]['old_time_stamp']
+            Old_Timestamp = data[i]['old_time']
             cryptocurrency_visible = Cryptocurrency in rv.data
             currency_visible = Currency in rv.data
             value_visible = Curr_Val in rv.data
@@ -235,7 +235,7 @@ def test_exchanges_update_correct(client):
             cryptocurrency = data[i]['cryptocurrency']
             currency = data[i]['currency']
             curr_exch_rate = client.exchange_rate(cryptocurrency, currency)['price']
-            curr_stored_exch = data[i]['value']
+            curr_stored_exch = data[i]['current_value']
             if curr_exch_rate == curr_stored_exch:
                 assert True
             else:
