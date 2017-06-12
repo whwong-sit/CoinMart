@@ -12,7 +12,7 @@ create table user_watchlists(
   watchlist_id integer primary key autoincrement,
   username text not null,
   watchlist_name text not null,
-  foreign key(username) references users(username),
+  foreign key(username) references users(username)
 );
 
 drop table if exists watchlist_items;
