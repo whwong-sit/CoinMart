@@ -27,15 +27,8 @@ Feature: Login Page
     And she logs in with username "baduser" and password "badpasswd"
     Then she should see a message of "user not registered"
 
-  Scenario: Login Incorrect Login
-    Given a user visits the site
-    When a user visits the login page
-    And she logs in with username "admin" and password "badpasswd"
-    Then she should see a message of "Incorrect username or password"
-
   Scenario: Logout
      Given a user visits the login page
      When she logs in
      And she clicks on the Logout link
      Then she sees a message telling her she has logged out
-

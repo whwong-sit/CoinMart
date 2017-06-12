@@ -33,16 +33,6 @@ def login(client, username, password):
 def logout(client):
     return client.get('/logout', follow_redirects=True)
 
-def getExchangeRate(currency_1, currency_2):
-    currency_2_lowercase = currency_2.lower()
-    main_api = 'https://api.coinmarketcap.com/v1/ticker/'
-    search_currency = currency_1 + '/?convert=' + currency_2
-    url = main_api + search_currency
-    json_data = requests.get(url).json()
-    json_convert_price = json_data[0]['price_' + currency_2_lowercase]
-    price = float(json_convert_price)
-    return price
-
 def test_empty_db(client):
     rv = client.get('/')
     if __name__ == '__main__':
@@ -200,16 +190,25 @@ def test_old_exch_correct():
                 assert False
         assert True
 
-def test_getExchangeRateIsFloat():
-    assert isinstance(getExchangeRate('bitcoin', 'EUR'), float)
+def test_exchange_rate_is_float():
+    with coinmart.app.app_context():
+        response = coinmart.exchange_rate('bitcoin', 'EUR')
+        assert isinstance(response['price'], float)
+        assert isinstance(response['date_time'], str)
+
+def test_old_exchange_rate_is_float():
+    with coinmart.app.app_context():
+        response = coinmart.get_previous_exchange_rate('BTC', 'EUR')
+        assert isinstance(response['old_exch'], float)
+        assert isinstance(response['old_time'], str)
 
 
 def test_getExchangeRateComparison():
-    assert getExchangeRate('bitcoin', 'EUR') != getExchangeRate('bitcoin', 'AUD')
+    assert coinmart.exchange_rate('bitcoin', 'EUR') != coinmart.exchange_rate('bitcoin', 'AUD')
 
 
 def test_getExchangeRateComparison2():
-    assert getExchangeRate('ethereum', 'GBP') != getExchangeRate('bitcoin', 'GBP')
+    assert coinmart.exchange_rate('ethereum', 'GBP') != coinmart.exchange_rate('bitcoin', 'GBP')
 
 def test_add_watchlist(client):
     with client as c:
@@ -234,16 +233,10 @@ def test_exchanges_update_correct(client):
         ), follow_redirects=True)
     if __name__ == '__main__':
         client.getUpdatedWatchlistExchanges()
-        data = client.get_user_watchlists()
-        for i in range(len(data)):
-            cryptocurrency = data[i]['cryptocurrency']
-            currency = data[i]['currency']
-            curr_exch_rate = client.exchange_rate(cryptocurrency, currency)['price']
-            curr_stored_exch = data[i]['current_value']
-            if curr_exch_rate == curr_stored_exch:
-                assert True
-            else:
-                assert False
+        data = client.get_user_watchlists('bitcoin')
+        curr_exch_rate = client.exchange_rate('bitcoin', 'EUR')['price']
+        assert (curr_exch_rate == data['current_value'])
+
 
 def test_user_watchlist(client):
     with client as c:
@@ -285,3 +278,12 @@ def test_addapair_in_a_watchlist(client):
     ), follow_redirects=True)
     if __name__ == '__main__':
         assert b'New pair added' in rv.data
+
+def test_get_user_watchlists():
+    if __name__ == '__main__':
+        bitcoin_details = coinmart.get_user_watchlists('bitcoin')
+        watchlist_name_correct = (bitcoin_details['watchlist_name'] == 'bitcoin')
+        username_correct = (bitcoin_details['username'] == 'admin')
+        cryptocurrency_correct = (bitcoin_details['cryptocurrency'] == 'Bitcoin')
+        currency_correct = (bitcoin_details['currency'] == 'EUR')
+        assert (watchlist_name_correct and username_correct and cryptocurrency_correct and currency_correct)

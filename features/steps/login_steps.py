@@ -3,6 +3,7 @@ from hamcrest import assert_that, equal_to
 import re
 from login_utils import *
 import time
+import coinmart
 
 
 @when(u'a user visits the login page')
@@ -64,7 +65,7 @@ def login_page(context):
 
 @given(u'she sees the Logout link')
 def see_logout_link(context):
-    flaskr_found = re.search("Log out", context.browser.page_source, re.IGNORECASE)
+    flaskr_found = re.search("log out", context.browser.page_source, re.IGNORECASE)
     assert flaskr_found
 
 
@@ -91,3 +92,16 @@ def click_logout_link(context):
     if logout_found:
         logout_found.click()
     pass
+
+@when(u'she clicks the My lists button')
+def click_my_lists_button(context):
+    my_lists_found = context.browser.find_element_by_name("My Lists")
+    if my_lists_found:
+        my_lists_found.click()
+    pass
+
+@then(u'she should see the correct exchanges')
+def sees_correct_exchanges(context):
+    exch = context.exchange_rate('Bitcoin', 'EUR')
+    exch_correct = re.search(exch, context.browser.page_source, re.IGNORECASE)
+    assert exch_correct

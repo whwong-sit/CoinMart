@@ -125,19 +125,20 @@ def getUpdatedWatchlistExchanges():
     for i in range(len(current_user_watchlists)):
         watchlist = current_user_watchlists[i]['watchlist_name']
         watchlist_info = get_user_watchlists(watchlist)
-        cryptocurrency = watchlist_info[0]['cryptocurrency']
-        currency = watchlist_info[0]['currency']
-        crypto_code = exchange_rate(cryptocurrency, currency)['symbol']
-        old_exch = get_previous_exchange_rate(crypto_code, currency)['old_exch']
-        old_time = get_previous_exchange_rate(crypto_code, currency)['old_time']
-        new_exchangeRate = exchange_rate(cryptocurrency, currency)['price']
-        new_timeStamp = exchange_rate(cryptocurrency, currency)['date_time']
-        db = get_db()
-        auth_user = session.get("username")
-        watchlist_id = db.execute('select watchlist_id from user_watchlists where user_watchlists.username = "%s"' % auth_user).fetchall()[i][0]
-        db.execute('update watchlist_items set current_value = (?), current_time = (?) where watchlist_items.watchlist_id = (?)', [new_exchangeRate, new_timeStamp, watchlist_id])
-        db.execute('update historical_watchlist_data set old_value = (?), old_time = (?) where historical_watchlist_data.watchlist_id = (?)', [old_exch, old_time, watchlist_id])
-        db.commit()
+        if len(watchlist_info)!=0:
+            cryptocurrency = watchlist_info[0]['cryptocurrency']
+            currency = watchlist_info[0]['currency']
+            crypto_code = exchange_rate(cryptocurrency, currency)['symbol']
+            old_exch = get_previous_exchange_rate(crypto_code, currency)['old_exch']
+            old_time = get_previous_exchange_rate(crypto_code, currency)['old_time']
+            new_exchangeRate = exchange_rate(cryptocurrency, currency)['price']
+            new_timeStamp = exchange_rate(cryptocurrency, currency)['date_time']
+            db = get_db()
+            auth_user = session.get("username")
+            watchlist_id = db.execute('select watchlist_id from user_watchlists where user_watchlists.username = "%s"' % auth_user).fetchall()[i][0]
+            db.execute('update watchlist_items set current_value = (?), current_time = (?) where watchlist_items.watchlist_id = (?)', [new_exchangeRate, new_timeStamp, watchlist_id])
+            db.execute('update historical_watchlist_data set old_value = (?), old_time = (?) where historical_watchlist_data.watchlist_id = (?)', [old_exch, old_time, watchlist_id])
+            db.commit()
 
 def crypto_currency_list():
     main_api = 'https://api.coinmarketcap.com/v1/ticker/'
@@ -153,38 +154,30 @@ def monetary_currency_list():
 
 def delete_watchlist_method(username,watchlistname):
     db = get_db()
-    cur = db.execute(
-        'DELETE FROM watchlist_items where watchlist_items.username =? and watchlist_items.watchlist_name =? ',
-        [username, watchlistname])
+#    cur = db.execute('DELETE FROM watchlist_items where watchlist_items.username =? and watchlist_items.watchlist_name =? ', [username, watchlistname])
     db.commit()
-    cur.fetchall()
-    cur.close()
-    cur = db.execute(
-        'DELETE FROM historical_watchlist_data where historical_watchlist_data.username=? and historical_watchlist_data.watchlist_name =? ',
-        [username, watchlistname])
+#    cur.fetchall()
+#    cur.close()
+#    cur = db.execute('DELETE FROM historical_watchlist_data where historical_watchlist_data.username=? and historical_watchlist_data.watchlist_name =? ', [username, watchlistname])
     db.commit()
-    cur.fetchall()
-    cur.close()
-    cur = db.execute(
-        'DELETE FROM user_watchlists where user_watchlists.username=? and user_watchlists.watchlist_name =? ',
-        [username, watchlistname])
+#    cur.fetchall()
+#    cur.close()
+#    cur = db.execute('DELETE FROM user_watchlists where user_watchlists.username=? and user_watchlists.watchlist_name =? ',[username, watchlistname])
     db.commit()
-    cur.fetchall()
-    cur.close()
+#    cur.fetchall()
+#    cur.close()
 
 
 def delete_userwatchlistspair(username,watchlistname,cryptocurrency,currency):
     db = get_db()
-    cur = db.execute('DELETE FROM watchlist_items where watchlist_items.username =? and watchlist_items.watchlist_name =? and watchlist_items.cryptocurrency  = ? and watchlist_items.currency   = ?',[username,watchlistname,cryptocurrency,currency ])
+#   cur = db.execute('DELETE FROM watchlist_items where watchlist_items.username =? and watchlist_items.watchlist_name =? and watchlist_items.cryptocurrency  = ? and watchlist_items.currency   = ?',[username,watchlistname,cryptocurrency,currency ])
     db.commit()
-    cur.fetchall()
-    cur.close()
-    cur = db.execute(
-        'DELETE FROM historical_watchlist_data where historical_watchlist_data.username=? and historical_watchlist_data.watchlist_name =? and historical_watchlist_data.cryptocurrency  = ? and historical_watchlist_data.currency   = ?',
-        [username,watchlistname, cryptocurrency, currency])
-    db.commit()
-    cur.fetchall()
-    cur.close()
+#    cur.fetchall()
+#    cur.close()
+#    cur = db.execute('DELETE FROM historical_watchlist_data where historical_watchlist_data.username=? and historical_watchlist_data.watchlist_name =? and historical_watchlist_data.cryptocurrency  = ? and historical_watchlist_data.currency   = ?',[username,watchlistname, cryptocurrency, currency])
+#    db.commit()
+#    cur.fetchall()
+#    cur.close()
 
 
 def query_db(query, args=(), one=False):
