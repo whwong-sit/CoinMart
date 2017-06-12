@@ -1,9 +1,12 @@
 # coding=utf-8
 import os
 import pytest
-import coinmart
 from coinmart import coinmart
 import tempfile
+import requests
+import unittest
+
+from flask import request
 
 
 @pytest.fixture
@@ -30,11 +33,21 @@ def login(client, username, password):
 def logout(client):
     return client.get('/logout', follow_redirects=True)
 
+def getExchangeRate(currency_1, currency_2):
+    currency_2_lowercase = currency_2.lower()
+    main_api = 'https://api.coinmarketcap.com/v1/ticker/'
+    search_currency = currency_1 + '/?convert=' + currency_2
+    url = main_api + search_currency
+    json_data = requests.get(url).json()
+    json_convert_price = json_data[0]['price_' + currency_2_lowercase]
+    price = float(json_convert_price)
+    return price
 
 def test_empty_db(client):
     rv = client.get('/')
     if __name__ == '__main__':
         assert b'Unbelievable. No watchlist created so far' in rv.data
+
 
 def test_login_logout(client):
     rv = login(client, 'admin', 'default')
@@ -60,9 +73,9 @@ def test_login_incorrect_credentials(client):
 
 def test_register_login(client):
     with client as c:
-        rv = login(c, 'admin', 'default')
+        rv = login(client, 'admin', 'default')
         assert b'Login Success!' in rv.data
-        rv = c.post('/register', data=dict(
+        rv = client.post('/register', data=dict(
             username='Test',
             password='Hema7067',
             email='Test@yahoo.com',
@@ -70,7 +83,6 @@ def test_register_login(client):
         ), follow_redirects=True)
         if __name__ == '__main__':
             assert b'You were successfully registered and have been logged in' in rv.data
-
 
 def test_register_invalid_password(client):
     rv = login(client, 'admin', 'default')
@@ -188,6 +200,17 @@ def test_old_exch_correct():
                 assert False
         assert True
 
+def test_getExchangeRateIsFloat():
+    assert isinstance(getExchangeRate('bitcoin', 'EUR'), float)
+
+
+def test_getExchangeRateComparison():
+    assert getExchangeRate('bitcoin', 'EUR') != getExchangeRate('bitcoin', 'AUD')
+
+
+def test_getExchangeRateComparison2():
+    assert getExchangeRate('ethereum', 'GBP') != getExchangeRate('bitcoin', 'GBP')
+
 def test_add_watchlist(client):
     with client as c:
         rv = c.post('/login', data=dict(
@@ -197,25 +220,6 @@ def test_add_watchlist(client):
     if __name__ == '__main__':
         coinmart.add_watchlist("Ripple", "USD")
         assert b'Ripple' and b'USD' in rv.data
-
-def test_exchange_rate_is_float():
-    with coinmart.app.app_context():
-        response = coinmart.exchange_rate('bitcoin', 'EUR')
-        assert isinstance(response['price'], float)
-        assert isinstance(response['date_time'], str)
-
-def test_old_exchange_rate_is_float():
-    with coinmart.app.app_context():
-        response = coinmart.get_previous_exchange_rate('BTC', 'EUR')
-        assert isinstance(response['old_exch'], float)
-        assert isinstance(response['old_time'], str)
-
-
-def test_exchange_rate_comparison():
-    with coinmart.app.app_context():
-        assert coinmart.exchange_rate('bitcoin', 'EUR') != coinmart.exchange_rate('bitcoin', 'AUD')
-        assert coinmart.exchange_rate('ethereum', 'GBP') != coinmart.exchange_rate('bitcoin', 'GBP')
-
 
 def test_currency_list():
     with coinmart.app.app_context():
@@ -241,6 +245,25 @@ def test_exchanges_update_correct(client):
             else:
                 assert False
 
+def test_user_watchlist(client):
+    with client as c:
+        rv = c.post('/login', data=dict(
+            username='Test',
+            password='Test_123'
+        ), follow_redirects=True)
+    if __name__ == '__main__':
+        assert b'Login Success!' in rv.data
+        assert client.get('/')
+        assert client.show_watchlists()
+
+def test_create_watchlist(client):
+    rv = login(client, 'admin', 'default')
+    assert b'Login Success!' in rv.data
+    rv = client.post('/addwatchlist', data=dict(
+        watchlistname="admin",
+    ), follow_redirects=True)
+    if __name__ == '__main__':
+        assert b'add watch list Success!' in rv.data
 
 def test_user_watchlist(client):
     with client as c:
@@ -253,15 +276,12 @@ def test_user_watchlist(client):
         assert client.get('/')
         assert client.show_watchlists()
 
-
-def test_add_watchlist(client):
-    with client as c:
-        rv = c.post('/login', data=dict(
-            username='Test',
-            password='Test_123'
-        ), follow_redirects=True)
+def test_addapair_in_a_watchlist(client):
+    rv = login(client, 'admin', 'default')
+    assert b'Login Success!' in rv.data
+    rv = client.post('/addpair', data=dict(
+        msg="admin bitcoin",
+        currency="EUR"
+    ), follow_redirects=True)
     if __name__ == '__main__':
-        client.add_watchlist('bitcoin', 'EUR')
-        assert b'New watchlist added' in rv.data
-        assert client.get('/')
-        assert client.show_watchlists()
+        assert b'New pair added' in rv.data
