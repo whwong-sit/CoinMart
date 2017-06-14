@@ -150,7 +150,7 @@ def test_delete_watchlist(client):
         watchlistname="admin",
     ), follow_redirects=True)
     assert b'add watch list Success!' in rv.data
-    rv = client.get('/deletewatchlist?name=delete_admin')
+    rv = client.get('/deletewatchlist?name=delete_admin_1')
     if __name__ == '__main__':
         assert b'delete watch list Success!' in rv.data
 
@@ -180,7 +180,7 @@ def test_addapair_in_a_watchlist(client):
 def test_deleteapair_in_a_watchlist(client):
     rv = login(client, 'admin', 'default')
     assert b'Login Success!' in rv.data
-    rv = client.get('/deletepair?name=admin_bitcoin_EUR')
+    rv = client.get('/deletepair?name=admin_1_bitcoin_EUR')
     if __name__ == '__main__':
         assert b'delete Success!' in rv.data
 
