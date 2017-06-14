@@ -197,17 +197,17 @@ def test_get_user_watchlists():
 
 def test_get_user_watchlistsname():
        if __name__ == '__main__':
-           bitcoin_details = coinmart.get_user_watchlistsname('admin')
-           watchlist_name_correct = (bitcoin_details['watchlist_name'] == '')
-           username_correct = (bitcoin_details['username'] == '')
-           currency_correct = (bitcoin_details['id'] == '')
+           watchlist_details = coinmart.get_user_watchlistsname('admin')
+           watchlist_name_correct = (watchlist_details['watchlist_name'] == 'admin')
+           username_correct = (watchlist_details['username'] == 'admin')
+           currency_correct = (watchlist_details['id'] == '1')
            assert (watchlist_name_correct and username_correct and currency_correct)
 
 
-def test_get_user_watchlistsname():
+def get_user_watchlists_id():
     if __name__ == '__main__':
-        bitcoin_details = coinmart.get_user_watchlistsname('admin')
-        watchlist_name_correct = (bitcoin_details['watchlist_name'] == '')
-        username_correct = (bitcoin_details['username'] == '')
-        currency_correct = (bitcoin_details['id'] == '')
+        watchlists_id_details = coinmart.get_user_watchlists_id('admin')
+        watchlist_name_correct = (watchlists_id_details['watchlist_name'] == 'admin')
+        username_correct = (watchlists_id_details['username'] == 'admin')
+        currency_correct = (watchlists_id_details['id'] == '1')
         assert (watchlist_name_correct and username_correct and currency_correct)
