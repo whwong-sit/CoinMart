@@ -10,12 +10,12 @@ def watchlist_site(context):
 
 @then(u'she would see a button namely bitcoin EUR and click it')
 def visit_login(context):
-    delete = context.browser.find_element_by_id('delete_admin_bitcoin_EUR')
+    delete = context.browser.find_element_by_id('delete_1_bitcoin_EUR')
     delete.click()
 
 @when(u'she would see delete bottom behind admin link and clicks delete')
 def delete_admin(context):
-    context.browser.get(context.server_address + "/deletewatchlist?name=delete_admin")
+    context.browser.get(context.server_address + "/deletewatchlist?name=delete_admin_1")
 
 @then(u'she would see delete success')
 def delete_success(context):
