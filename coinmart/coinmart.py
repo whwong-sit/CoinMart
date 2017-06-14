@@ -173,24 +173,6 @@ def add_watchlist_pair_method(watchlistid,cryptocurrencyid,currency):
     db.commit()
     flash('New pair added')
 
-def add_watchlist(cryptocurrencyid, currency):
-    auth_user = session.get("username")
-    watchlistinfo = exchange_rate(cryptocurrencyid,currency)
-    if not session['logged_in']:
-        abort(401)
-    db=get_db()
-    db.execute("insert into user_watchlists(username, watchlist_id) values (?,?)", [auth_user, cryptocurrencyid])
-    db.execute("insert into watchlist_items(watchlist_id,cryptocurrency,currency,current_value,current_time) values (?,?,?,?,?)",
-               [cryptocurrencyid, watchlistinfo['crypto_currency'], currency, watchlistinfo['price'], watchlistinfo['date_time']])
-    cursor = db.execute("select * from historical_watchlist_data, watchlist_items where historical_watchlist_data.old_time <> watchlist_items.current_time and historical_watchlist_data.watchlist_id = watchlist_items.watchlist_id and "
-                        "historical_watchlist_data.cryptocurrency = watchlist_items.cryptocurrency and historical_watchlist_data.currency = watchlist_items.currency")
-    if len(cursor.fetchall())> 0 :
-        db.execute(
-            "insert into historical_watchlist_data(watchlist_id,cryptocurrency,currency,old_value,old_time) values (?,?,?,?,?)",
-            [cryptocurrencyid, watchlistinfo['crypto_currency'], currency, watchlistinfo['price'], watchlistinfo['date_time']])
-    db.commit()
-    flash('New watchlist added')
-    return redirect(url_for('show_watchlists'))
 
 
 @app.route('/addpair', methods=['GET', 'POST'])
