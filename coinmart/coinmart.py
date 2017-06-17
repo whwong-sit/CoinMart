@@ -185,7 +185,8 @@ def add_watchlist_pair():
             cryptocurrencyid=msg[0]
             currency = request.form['currency']
             watchlist_name=msg[1]
-            add_watchlist_pair_method(msg[2],cryptocurrencyid,currency)
+            watchlist_id=msg[2]
+            add_watchlist_pair_method(watchlist_id,cryptocurrencyid,currency)
         else:
             msg = request.args.get("name").split("_")
             watchlist_name=msg[0]
@@ -216,7 +217,9 @@ def delete_watchlist():
     if not session['logged_in']:
         abort(401)
     meg = request.args.get("name").split("_")
-    delete_watchlist_method(session['username'], meg[1],meg[2])
+    watchlistname=meg[1]
+    watchlistid=meg[2]
+    delete_watchlist_method(session['username'], watchlistname,watchlistid)
     flash("delete watch list Success!")
     watchlistsname = get_user_watchlistsname()
     return render_template("dashboard.html", watchlistsname=watchlistsname)
@@ -227,11 +230,15 @@ def delete_pair():
     if not session['logged_in']:
         abort(401)
     meg = request.args.get("name").split("_")
-    delete_userwatchlistspair(meg[1],meg[2],meg[3])
+    watchlists_name=meg[0]
+    watchlistid=meg[1]
+    cryptocurrency=meg[2]
+    currency=meg[3]
+    delete_userwatchlistspair(watchlistid,cryptocurrency,currency)
     flash("delete Success!")
     watchlistsname = get_user_watchlistsname()
-    user_watchlist = get_user_watchlists(meg[0])
-    showwatchlist = get_user_watchlists_id(meg[0])
+    user_watchlist = get_user_watchlists(watchlists_name)
+    showwatchlist = get_user_watchlists_id(watchlists_name)
     return render_template("dashboard.html", watchlistsname=watchlistsname, watchlists=user_watchlist,showwatchlist=showwatchlist)
 
 
