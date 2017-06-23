@@ -1,9 +1,13 @@
 # coding=utf-8
 import os
 import pytest
-import coinmart
 from coinmart import coinmart
 import tempfile
+import requests
+import unittest
+
+from flask import request
+
 
 
 @pytest.fixture
@@ -131,6 +135,26 @@ def test_currency_list():
         assert coinmart.crypto_currency_list()
 
 
+def test_create_watchlist(client):
+    rv = login(client, 'admin', 'default')
+    assert b'Login Success!' in rv.data
+    rv = client.post('/addwatchlist', data=dict(
+        watchlistname="admin",
+    ), follow_redirects=True)
+    if __name__ == '__main__':
+        assert b'add watch list Success!' in rv.data
+
+def test_delete_watchlist(client):
+    rv = login(client, 'admin', 'default')
+    assert b'Login Success!' in rv.data
+    rv = client.post('/addwatchlist', data=dict(
+        watchlistname="admin",
+    ), follow_redirects=True)
+    assert b'add watch list Success!' in rv.data
+    rv = client.get('/deletewatchlist?name=delete_admin_1')
+    if __name__ == '__main__':
+        assert b'delete watch list Success!' in rv.data
+
 def test_user_watchlist(client):
     with client as c:
         rv = c.post('/login', data=dict(
@@ -143,14 +167,47 @@ def test_user_watchlist(client):
         assert client.show_watchlists()
 
 
-def test_add_watchlist(client):
-    with client as c:
-        rv = c.post('/login', data=dict(
-            username='Test',
-            password='Test_123'
-        ), follow_redirects=True)
+def test_addapair_in_a_watchlist(client):
+    rv = login(client, 'admin', 'default')
+    assert b'Login Success!' in rv.data
+    rv = client.post('/addpair', data=dict(
+        msg="bitcoin admin 1",
+        currency="EUR"
+    ), follow_redirects=True)
     if __name__ == '__main__':
-        client.add_watchlist('bitcoin', 'EUR')
-        assert b'New watchlist added' in rv.data
-        assert client.get('/')
-        assert client.show_watchlists()
+        assert b'New pair added' in rv.data
+
+
+def test_deleteapair_in_a_watchlist(client):
+    rv = login(client, 'admin', 'default')
+    assert b'Login Success!' in rv.data
+    rv = client.get('/deletepair?name=admin_1_bitcoin_EUR')
+    if __name__ == '__main__':
+        assert b'delete Success!' in rv.data
+
+
+def test_get_user_watchlists():
+   if __name__ == '__main__':
+        bitcoin_details = coinmart.get_user_watchlists('bitcoin')
+        watchlist_name_correct = (bitcoin_details['watchlist_name'] == 'bitcoin')
+        username_correct = (bitcoin_details['username'] == 'admin')
+        cryptocurrency_correct = (bitcoin_details['cryptocurrency'] == 'Bitcoin')
+        currency_correct = (bitcoin_details['currency'] == 'EUR')
+        assert (watchlist_name_correct and username_correct and cryptocurrency_correct and currency_correct)
+
+def test_get_user_watchlistsname():
+       if __name__ == '__main__':
+           watchlist_details = coinmart.get_user_watchlistsname('admin')
+           watchlist_name_correct = (watchlist_details['watchlist_name'] == 'admin')
+           username_correct = (watchlist_details['username'] == 'admin')
+           currency_correct = (watchlist_details['id'] == '1')
+           assert (watchlist_name_correct and username_correct and currency_correct)
+
+
+def get_user_watchlists_id():
+    if __name__ == '__main__':
+        watchlists_id_details = coinmart.get_user_watchlists_id('admin')
+        watchlist_name_correct = (watchlists_id_details['watchlist_name'] == 'admin')
+        username_correct = (watchlists_id_details['username'] == 'admin')
+        currency_correct = (watchlists_id_details['id'] == '1')
+        assert (watchlist_name_correct and username_correct and currency_correct)
