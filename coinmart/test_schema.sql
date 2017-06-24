@@ -11,8 +11,8 @@ insert into users values('admin', 'default', 'admin@uni.sydney.edu.au');
 drop table if exists user_watchlists;
 create table user_watchlists(
   watchlist_id integer primary key AUTOINCREMENT,
-  username text,
-  watchlist_name text,
+  username text not null,
+  watchlist_name text not null,
   foreign key(username) references users(username)
 );
 
@@ -39,7 +39,3 @@ create table historical_watchlist_data(
   foreign key(watchlist_id) references user_watchlists(watchlist_id),
  primary key(watchlist_id,cryptocurrency,currency)
 );
-
-
-
-
