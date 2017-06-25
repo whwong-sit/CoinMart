@@ -17,7 +17,7 @@ def see_no_watchlists(context):
 @then(u'she should see her list of watchlists')
 def see_watchlists(context):
     context.browser.get(context.server_address + "/")
-    watchlist_found = re.search("My lists", context.browser.page_source, re.IGNORECASE)
+    watchlist_found = re.search("Cryptocurrency :", context.browser.page_source, re.IGNORECASE)
     assert watchlist_found
 
 @then(u'she should see her list of watchlists with current value')

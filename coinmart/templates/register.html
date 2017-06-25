@@ -4,9 +4,8 @@
 {% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
 
 <div class="container">
-	<div class="row">
-	<section id="content"  >
-        <form action="{{ url_for('register') }}" method=post class="col-xs-12 col-md-offset-6">
+	<section id="content">
+        <form action="{{ url_for('register') }}" method=post>
             <input type="text" name="username" placeholder="Enter a Username or Email" required="" id="username" />
                         <input id=email type=text name=email placeholder="Enter an Email" />
 
@@ -15,8 +14,7 @@
 
             <input id=btn_register type=submit value=Register name=btn_register />
 
-        </form>
+  </form>
     </section>
-    </div>
 </div>
 {% endblock %}
