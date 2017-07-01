@@ -59,6 +59,7 @@ def test_login_incorrect_credentials(client):
             password='test'
         ), follow_redirects=False)
     if __name__ == '__main__':
+        client.app.run(port=5050)
         assert b'Incorrect username or password' in rv.data
 
 
@@ -107,7 +108,7 @@ def test_registered_users(client):
                coinmart.app.config['PASSWORD'])
     assert b'Login Success!' in rv.data
     rv = client.post('/register', data=dict(
-        username='Test1',
+        username='Test',
         password='Hema7067',
         email='test@yahoo.com',
         cfm_password='Hema7067'
@@ -115,6 +116,31 @@ def test_registered_users(client):
     if __name__ == '__main__':
         assert b'User already registered' in rv.data
 
+def test_registered_Invalid_password1(client):
+    rv = login(client, coinmart.app.config['USERNAME'],
+               coinmart.app.config['PASSWORD'])
+    assert b'Login Success!' in rv.data
+    rv = client.post('/register', data=dict(
+        username='Test',
+        password='stnstnst',
+        email='test@yahoo.com',
+        cfm_password='stnstnst'
+    ), follow_redirects=True)
+    if __name__ == '__main__':
+        assert b'Invalid password. Passwords must contain at least 8 characters, and at least one capital letter and number'in rv.data
+
+def test_registered_Invalid_password2(client):
+    rv = login(client, coinmart.app.config['USERNAME'],
+               coinmart.app.config['PASSWORD'])
+    assert b'Login Success!' in rv.data
+    rv = client.post('/register', data=dict(
+        username='Test',
+        password='12345678',
+        email='test@yahoo.com',
+        cfm_password='12345678'
+    ), follow_redirects=True)
+    if __name__ == '__main__':
+        assert b'Invalid password. Passwords must contain at least 8 characters, and at least one capital letter and number'in rv.data
 
 def test_exchange_rate_is_float():
     with coinmart.app.app_context():
@@ -171,12 +197,18 @@ def test_addapair_in_a_watchlist(client):
     rv = login(client, 'admin', 'default')
     assert b'Login Success!' in rv.data
     rv = client.post('/addpair', data=dict(
-        msg="bitcoin admin 1",
+        cryptocurrency="bitcoin admin 1",
         currency="EUR"
     ), follow_redirects=True)
     if __name__ == '__main__':
         assert b'New pair added' in rv.data
 
+def test_addapair_in_a_watchlist1(client):
+    rv = login(client, 'admin', 'default')
+    assert b'Login Success!' in rv.data
+    rv = client.get('/addpair?name=admin_1')
+    if __name__ == '__main__':
+        assert b'New pair added' in rv.data
 
 def test_deleteapair_in_a_watchlist(client):
     rv = login(client, 'admin', 'default')
@@ -184,7 +216,6 @@ def test_deleteapair_in_a_watchlist(client):
     rv = client.get('/deletepair?name=admin_1_bitcoin_EUR')
     if __name__ == '__main__':
         assert b'delete Success!' in rv.data
-
 
 def test_get_user_watchlists():
    if __name__ == '__main__':
@@ -211,3 +242,5 @@ def get_user_watchlists_id():
         username_correct = (watchlists_id_details['username'] == 'admin')
         currency_correct = (watchlists_id_details['id'] == '1')
         assert (watchlist_name_correct and username_correct and currency_correct)
+
+
