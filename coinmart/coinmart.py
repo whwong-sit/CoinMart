@@ -5,6 +5,7 @@ import re
 import time
 import requests
 from time import strftime
+import datetime
 
 from flask import Flask, request, session, g, redirect, url_for, abort, \
      render_template, flash
@@ -107,7 +108,44 @@ def exchange_rate(crypto_currency, monetary_currency):
     data['monetary_currency'] = currency_convert_to_lowercase
     data['price'] = price
     data['date_time'] = date_time
+    data['symbol'] = json_data[0]['symbol']
     return data
+
+def get_previous_exchange_rate(crypto_currency, monetary_currency):
+    data = {}
+    currency_convert_from = crypto_currency
+    currency_convert_to = monetary_currency
+    currency_convert_to_lowercase = currency_convert_to.lower()
+    main_api = 'http://coinmarketcap.northpole.ro/api/v6/history/'
+    search = currency_convert_from + '_2017.json'
+    url = main_api + search
+    json_data = requests.get(url).json()
+    old_exch = json_data['history'][time.strftime("%d-%m-%Y")]['price'][currency_convert_to_lowercase]
+    timestamp = json_data['history'][time.strftime("%d-%m-%Y")]['timestamp']
+    old_time = datetime.datetime.fromtimestamp(int(timestamp)).strftime("%dth %b %Y %r")
+    data['old_exch'] = old_exch
+    data['old_time'] = old_time
+    return data
+
+def getUpdatedWatchlistExchanges():
+    current_user_watchlists = get_user_watchlistsname()
+    for i in range(len(current_user_watchlists)):
+        watchlist = current_user_watchlists[i]['watchlist_name']
+        watchlist_info = get_user_watchlists(watchlist)
+        if len(watchlist_info)!=0:
+            cryptocurrency = watchlist_info[0]['cryptocurrency']
+            currency = watchlist_info[0]['currency']
+            crypto_code = exchange_rate(cryptocurrency, currency)['symbol']
+            old_exch = get_previous_exchange_rate(crypto_code, currency)['old_exch']
+            old_time = get_previous_exchange_rate(crypto_code, currency)['old_time']
+            new_exchangeRate = exchange_rate(cryptocurrency, currency)['price']
+            new_timeStamp = exchange_rate(cryptocurrency, currency)['date_time']
+            db = get_db()
+            auth_user = session.get("username")
+            watchlist_id = db.execute('select watchlist_id from user_watchlists where user_watchlists.username = "%s"' % auth_user).fetchall()[i][0]
+            db.execute('update watchlist_items set current_value = (?), current_time = (?) where watchlist_items.watchlist_id = (?)', [new_exchangeRate, new_timeStamp, watchlist_id])
+            db.execute('update historical_watchlist_data set old_value = (?), old_time = (?) where historical_watchlist_data.watchlist_id = (?)', [old_exch, old_time, watchlist_id])
+            db.commit()
 
 def delete_watchlist_method(username,watchlistname,watchlistid):
     db = get_db()
@@ -164,15 +202,14 @@ def add_watchlist_pair_method(watchlistid,cryptocurrencyid,currency):
     db=get_db()
     db.execute("insert into watchlist_items(watchlist_id,cryptocurrency,currency,current_value,current_time) values (?,?,?,?,?)",
                [watchlistid, cryptocurrencyid, currency, watchlistinfo['price'], watchlistinfo['date_time']])
-    cursor = db.execute("select * from historical_watchlist_data, watchlist_items where historical_watchlist_data.old_time <> watchlist_items.current_time  and "
-                        "historical_watchlist_data.cryptocurrency = watchlist_items.cryptocurrency and historical_watchlist_data.currency = watchlist_items.currency")
+    cursor = db.execute("select * from historical_watchlist_data where historical_watchlist_data.watchlist_id = ?", [watchlistid])
     if len(cursor.fetchall())< 1 :
         db.execute(
             "insert into historical_watchlist_data(watchlist_id,cryptocurrency,currency,old_value,old_time) values (?,?,?,?,?)",
             [watchlistid, cryptocurrencyid, currency, watchlistinfo['price'], watchlistinfo['date_time']])
+    getUpdatedWatchlistExchanges()
     db.commit()
     flash('New pair added')
-
 
 
 @app.route('/addpair', methods=['GET', 'POST'])
@@ -274,6 +311,7 @@ def login():
                 session['logged_in'] = True
                 session['username'] = user
                 flash("Login Success!")
+                getUpdatedWatchlistExchanges()
                 watchlistsname = get_user_watchlistsname()
                 return render_template('dashboard.html',watchlistsname=watchlistsname)
             elif user not in rows2:
