@@ -37,7 +37,10 @@ def init_db(schema='schema.sql'):
         db.cursor().executescript(f.read())
     db.commit()
 
-
+@app.cli.command('initdb')
+def initdb_command():
+    init_db()
+    print('Initialized the database.')
 
 
 def get_db():
@@ -140,7 +143,11 @@ def delete_userwatchlistspair(watchlistid,cryptocurrency,currency):
     cur.close()
 
 
-
+def query_db(query, args=(), one=False):
+    cur = get_db().execute(query, args)
+    rv = cur.fetchall()
+    cur.close()
+    return (rv[0] if rv else None) if one else rv
 
 def add_watchlistname(watchlist_name):
     auth_user = session.get("username")
