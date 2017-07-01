@@ -47,3 +47,6 @@ cm_env
 .eggs
 coinmart.egg-info/
 .idea
+
+.coverage
+htmlcov/**
