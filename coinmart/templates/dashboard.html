@@ -10,7 +10,7 @@
                     <div  class="collapse" id="subItems">
                      {% for watchlist in watchlistsname %}
                         <li  class="list-group-item "><a id={{watchlist.watchlist_name}}  action="{{ url_for('add_watchlist_pair') }}" method=GET  href="{{ url_for('add_watchlist_pair') }}?name={{ watchlist.watchlist_name}}_{{watchlist.watchlist_id}}" style="font-size:30px;text-align:left;color: black;width: 100px" >{{ watchlist.watchlist_name}}</a>
-                            <span class="badge"><a id=delete_{{watchlist.watchlist_name}}  action="{{ url_for('delete_watchlist') }}" method=GET  href="{{ url_for('delete_watchlist') }}?name=delete_{{watchlist.watchlist_name}}_{{watchlist.watchlist_id}}" style="font-size:20px;text-align:right ;width: 60px;color: red" >detete</a></span> </li>
+                            <span class="badge"><a id=delete_{{watchlist.watchlist_name}}  action="{{ url_for('delete_watchlist') }}" method=GET  href="{{ url_for('delete_watchlist') }}?name=delete_{{watchlist.watchlist_name}}_{{watchlist.watchlist_id}}" style="font-size:20px;text-align:right ;width: 60px;color: red" >delete</a></span> </li>
                      {%endfor%}
                     <a id="test" name="test" href="{{ url_for('add_watchlist') }}" class="list-group-item" style="font-size:28px;text-align:center;">+</a>
                   </div>
