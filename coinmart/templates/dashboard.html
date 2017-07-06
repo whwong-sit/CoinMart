@@ -6,7 +6,7 @@
         <!-- sidebar -->
         <div class="col-xs-9 col-sm-3 sidebar-offcanvas" id="sidebar" role="navigation">
             <ul class="nav">
-              <a id="My lists" name="My Lists" href="#subItems" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#MainMenu">My Lists<i class="fa fa-caret-down"></i></a>
+              <a id="My lists"name="My Lists" href="#subItems" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#MainMenu">My Lists<i class="fa fa-caret-down"></i></a>
                     <div  class="collapse" id="subItems">
                      {% for watchlist in watchlistsname %}
                         <li  class="list-group-item "><a id={{watchlist.watchlist_name}}  action="{{ url_for('add_watchlist_pair') }}" method=GET  href="{{ url_for('add_watchlist_pair') }}?name={{ watchlist.watchlist_name}}&id={{ watchlist.watchlist_id}}" style="font-size:30px;text-align:left;color: black;width: 100px" >{{ watchlist.watchlist_name}}</a>

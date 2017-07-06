@@ -4,23 +4,26 @@ import re
 from login_utils import *
 from behave import *
 
+
+
 @when(u'she logs in and clicks My Lists')
 def see_add(context):
-    add_found = context.browser.find_element_by_id("My lists")
-    add_found.click()
-    assert add_found
+    my_lists = context.browser.find_element_by_id("My lists")
+    my_lists.click()
+    assert my_lists
 
 
 @then(u'she would see a add button and click it')
 def see(context):
     add_found = context.browser.find_element_by_id('test')
     add_found.click()
+    assert add_found
 
 
 @When(u'a user visits the new watchlist page')
 def enter_add_new(context):
-    my_lists = context.browser.find_element_by_id("My lists")
-    my_lists.click()
+    my_watchlists = context.browser.find_element_by_id("My lists")
+    my_watchlists.click()
     context.browser.get(context.server_address + "/add")
 
 
@@ -36,6 +39,7 @@ def create_addwatchlist(context,admin):
     uname.clear();
     uname.send_keys(admin)
     login_button.click()
+
 @then(u'she should see a message of add watch list Success!')
 def add_successful(context):
     new_found = re.search("add watch list Success!", context.browser.page_source, re.IGNORECASE)
@@ -43,7 +47,7 @@ def add_successful(context):
 
 @given (u'a user visits the new watchlist page')
 def add_page(context):
-    add_found = context.browser.find_element_by_id("My lists")
+    add_found = context.browser.find_element_by_name("My lists")
     add_found.click()
     add_found = context.browser.find_element_by_id("admin")
     add_found.click()

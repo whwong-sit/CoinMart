@@ -1,79 +1,52 @@
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
+*.log
+local_settings.py
 
-# Precompiled Headers
-*.gch
-*.pch
+# Flask stuff:
+instance/
+.webassets-cache
 
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
+# Scrapy stuff:
+.scrapy
 
-# Fortran module files
-*.mod
+# Sphinx documentation
+docs/_build/
 
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
+# PyBuilder
+target/
 
-# Executables
-*.exe
-*.out
-*.app
+# IPython Notebook
+.ipynb_checkpoints
 
-# =========================
-# Operating System Files
-# =========================
+# pyenv
+.python-version
 
-# OSX
-# =========================
+# celery beat schedule file
+celerybeat-schedule
 
-.DS_Store
-.AppleDouble
-.LSOverride
+# dotenv
+.env
 
-# Thumbnails
-._*
+# virtualenv
+venv/
+ENV/
 
-# Files that might appear in the root of a volume
-.DocumentRevisions-V100
-.fseventsd
-.Spotlight-V100
-.TemporaryItems
-.Trashes
-.VolumeIcon.icns
+# Spyder project settings
+.spyderproject
 
-# Directories potentially created on remote AFP share
-.AppleDB
-.AppleDesktop
-Network Trash Folder
-Temporary Items
-.apdisk
+# Rope project settings
+.ropeproject
 
-# Windows
-# =========================
+#Coinmart virtualenv
+<<<<<<< HEAD
+cm_env
 
-# Windows image file caches
-Thumbs.db
-ehthumbs.db
+#Dev stuff
+*.pyc
+**/.DS_Store
+.cache
+.eggs
+coinmart.egg-info/
+.idea
 
-# Folder config file
-Desktop.ini
-
-# Recycle Bin used on file shares
-$RECYCLE.BIN/
-
-# Windows Installer files
-*.cab
-*.msi
-*.msm
-*.msp
-
-# Windows shortcuts
-*.lnk
+.coverage
+htmlcov/**
