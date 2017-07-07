@@ -5,7 +5,6 @@ from coinmart import coinmart
 import tempfile
 import requests
 import unittest
-
 from flask import request
 
 

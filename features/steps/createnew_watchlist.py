@@ -15,17 +15,9 @@ def see_add(context):
 
 @then(u'she would see a add button and click it')
 def see(context):
-    add_found = context.browser.find_element_by_id('test')
-    add_found.click()
-    assert add_found
-
-
-@When(u'a user visits the new watchlist page')
-def enter_add_new(context):
-    my_watchlists = context.browser.find_element_by_id("My lists")
-    my_watchlists.click()
-    context.browser.get(context.server_address + "/add")
-
+    add_btn = context.browser.find_element_by_id('test')
+    add_btn.click()
+    assert add_btn
 
 @then(u'she would see "Enter a watchlist name"')
 def see_addwatchlist(context):
@@ -42,30 +34,31 @@ def create_addwatchlist(context,admin):
 
 @then(u'she should see a message of add watch list Success!')
 def add_successful(context):
-    new_found = re.search("add watch list Success!", context.browser.page_source, re.IGNORECASE)
-    assert new_found
+    msg_found = re.search("add watch list Success!", context.browser.page_source, re.IGNORECASE)
+    assert msg_found
 
 @given (u'a user visits the new watchlist page')
 def add_page(context):
-    add_found = context.browser.find_element_by_name("My lists")
-    add_found.click()
-    add_found = context.browser.find_element_by_id("admin")
-    add_found.click()
+    list_found = context.browser.find_element_by_id("My lists")
+    list_found.click()
+    assert list_found
 
 
 @given(u'she should see the title of "admin"')
 def newWatchlist_found(context):
-    new_found = re.search("admin", context.browser.page_source, re.IGNORECASE)
-    assert new_found
+    admin_title_found = re.search("admin", context.browser.page_source, re.IGNORECASE)
+    assert admin_title_found
 
 
-@then(u'she should see the cryptocurrency')
+@then(u'she should see the Cryptocurrency')
 def currency_visit(context):
-    currency_found = re.search("cryptocurrency", context.browser.page_source, re.IGNORECASE)
-    assert currency_found
+    context.browser.get(context.server_address + "/addpair?name=admin&id=22")
+    cry_currency_found = re.search("Cryptocurrency", context.browser.page_source, re.IGNORECASE)
+    assert cry_currency_found
 
 @then(u'she should see the Currency')
 def currency_visit(context):
+    context.browser.get(context.server_address + "/addpair?name=admin&id=22")
     currency_found = re.search("Currency", context.browser.page_source, re.IGNORECASE)
     assert currency_found
 
