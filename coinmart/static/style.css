@@ -349,3 +349,123 @@ table td {
 
 
 
+
+#sidebar {
+  height: 100%;
+  padding-right: 0;
+  padding-top: 20px;
+}
+#sidebar .nav {
+  width: 95%;
+}
+#sidebar li {
+  border:0 #f2f2f2 solid;
+  border-bottom-width:1px;
+}
+
+/* collapsed sidebar styles */
+@media screen and (max-width: 767px) {
+  .row-offcanvas {
+    position: relative;
+    -webkit-transition: all 0.25s ease-out;
+    -moz-transition: all 0.25s ease-out;
+    transition: all 0.25s ease-out;
+  }
+  .row-offcanvas-right
+  .sidebar-offcanvas {
+    right: -41.6%;
+  }
+
+  .row-offcanvas-left
+  .sidebar-offcanvas {
+    left: -41.6%;
+  }
+  .row-offcanvas-right.active {
+    right: 41.6%;
+  }
+  .row-offcanvas-left.active {
+    left: 41.6%;
+  }
+  .sidebar-offcanvas {
+    position: absolute;
+    top: 0;
+    width: 41.6%;
+  }
+  #sidebar {
+    padding-top:0;
+  }
+}
+
+@media screen and (max-width: 640px) {
+	table {
+		overflow-x: auto;
+		display: block;
+	}
+}
+
+
+.myLists {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+  .myLists li {
+	  display: inline-block;
+	  width: 50%;
+  }
+
+@media screen and (min-width: 20em) {
+
+	.myLists li {
+    width: 33.33333%;
+  }
+
+}
+
+#watchlist {
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f8f8f8', endColorstr='#f9f9f9',GradientType=0 );
+	margin: 0 auto;
+	padding: 25px 0 0;
+	position: absolute;
+	right: 150px;
+	top: 300px;
+	text-align: center;
+	text-shadow: 0 1px 0 #fff;
+	width: 800px;
+}
+#watchlist form input[type="submit"] {
+	background: rgb(254,231,154);
+
+    border: none;
+    border-bottom: solid 1px ;
+  -webkit-transition: all 0.3s cubic-bezier(0.64, 0.09, 0.08, 1);
+   transition: all 0.3s cubic-bezier(0.64, 0.09, 0.08, 1);
+    text-align:center;
+
+	color: #85592e;
+	cursor: pointer;
+
+	font: bold 25px Helvetica, Arial, sans-serif;
+	height: 35px;
+
+	position: relative;
+
+	top: 200px;
+	text-shadow: 0 1px 0 rgba(255,255,255,0.5);
+	width: 120px;
+}
+#watchlist form input[type="submit"]:hover {
+	background: rgb(254,193,81);
+
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#fec151', endColorstr='#fee79a',GradientType=0 );
+}
+#watchlist label{
+	font-size:40px;
+		width:300px;
+	color:silver }
+#watchlist select{
+	font-size:28px;
+		width:300px;
+	color:silver
+}

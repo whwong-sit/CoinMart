@@ -10,5 +10,4 @@ Feature: Dashboard Page
     Given a user visits the site
     When a user visits the login page
     And she logs in with username "admin" and password "default"
-    Then she should see her list of watchlists
-
+    Then she should see the her list of watchlists

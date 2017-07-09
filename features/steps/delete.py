@@ -3,19 +3,21 @@ from hamcrest import assert_that, equal_to
 import re
 from login_utils import *
 import time
+from behave import *
+
 then
-@given(u'a user visits the watchlist site')
+@given(u'a user visits the watchlist page')
 def watchlist_site(context):
     pass
 
-@then(u'she would see a button namely bitcoin EUR and click it')
+@then(u'she would see a delete button')
 def visit_login(context):
-    delete = context.browser.find_element_by_id('delete_1_bitcoin_EUR')
-    delete.click()
+    delete_btn_found = re.search("delete", context.browser.page_source, re.IGNORECASE)
+    assert delete_btn_found
 
 @when(u'she would see delete bottom behind admin link and clicks delete')
 def delete_admin(context):
-    context.browser.get(context.server_address + "/deletewatchlist?name=delete_admin_1")
+    context.browser.get(context.server_address + "/deletewatchlist?name=delete_admin")
 
 @then(u'she would see delete success')
 def delete_success(context):

@@ -17,7 +17,7 @@ Feature: Create_new_watchlist page and some pair objects into this watch list
   Scenario: see the watchlist's ("admin") table
     Given a user visits the new watchlist page
     And she should see the title of "admin"
-    Then she should see the cryptocurrency
+    Then she should see the Cryptocurrency
     And she should see the Currency
     And she choose to add bitcoin and EUR as a new watchlist
     Then she returns to the dashboard and New pair added

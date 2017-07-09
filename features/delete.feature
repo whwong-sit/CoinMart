@@ -1,11 +1,5 @@
 # Created by stn at 2017/5/29
-Feature: delete a pair of currency in watchlist "admin" and delete watchlist namely admin
-
-
-  Scenario: delete watchlist pair in watchlist admin(bitcoin with EUR)
-    Given a user visits the watchlist site
-    Then she would see a button namely bitcoin EUR and click it
-    And she would see delete success
+Feature: Delete a watchlist
 
   Scenario: delete watchlist namely admin
     When she logs in and clicks My Lists

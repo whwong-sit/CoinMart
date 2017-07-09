@@ -4,6 +4,8 @@ import re
 from login_utils import *
 import time
 
+from behave import *
+
 
 @when(u'a user visits the register page')
 def visit_register(context):

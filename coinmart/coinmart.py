@@ -38,10 +38,6 @@ def init_db(schema='schema.sql'):
         db.cursor().executescript(f.read())
     db.commit()
 
-@app.cli.command('initdb')
-def initdb_command():
-    init_db()
-    print('Initialized the database.')
 
 
 def get_db():
@@ -69,8 +65,8 @@ def show_watchlists():
 def get_user_watchlists(showwatchlist):
     db = get_db()
     auth_user = session.get("username")
-    cur = db.execute('select *from user_watchlists, watchlist_items, historical_watchlist_data where user_watchlists.watchlist_id = watchlist_items.watchlist_id and user_watchlists.watchlist_id = historical_watchlist_data.watchlist_id and user_watchlists.username = ? and user_watchlists.watchlist_name=? and historical_watchlist_data.currency=watchlist_items.currency and historical_watchlist_data.cryptocurrency=watchlist_items.cryptocurrency',[auth_user,showwatchlist])
-    watchlists = cur.fetchall()
+    curWatchlistData = db.execute('select watchlist_items.watchlist_id, user_watchlists.watchlist_name, watchlist_items.cryptocurrency, watchlist_items.currency, watchlist_items.current_value, historical_watchlist_data.old_value, historical_watchlist_data.old_time from user_watchlists, watchlist_items, historical_watchlist_data where user_watchlists.username = ? and user_watchlists.watchlist_id = ? and watchlist_items.watchlist_id = ? and (historical_watchlist_data.watchlist_id = ? or historical_watchlist_data.watchlist_id <> ?) limit 1',[auth_user, showwatchlist, showwatchlist, showwatchlist, showwatchlist])
+    watchlists = curWatchlistData.fetchall()
     return watchlists
 
 
@@ -82,25 +78,16 @@ def get_user_watchlistsname():
     watchlistsname = cur.fetchall()
     return watchlistsname
 
-def get_user_watchlists_id(watchlistname):
-    db = get_db()
-    auth_user = session.get("username")
-    cur = db.execute(
-        'select * from user_watchlists where user_watchlists.username = ? and user_watchlists.watchlist_name = ?',[auth_user,watchlistname])
-    watchlistsid = cur.fetchall()
-    return watchlistsid
 
 def exchange_rate(crypto_currency, monetary_currency):
     data = {}
     currency_convert_from = crypto_currency
     currency_convert_to = monetary_currency
     currency_convert_to_lowercase = currency_convert_to.lower()
-
     main_api = 'https://api.coinmarketcap.com/v1/ticker/'
     search_currency = currency_convert_from + '/?convert=' + currency_convert_to
     url = main_api + search_currency
     json_data = requests.get(url).json()
-
     json_convert_price = json_data[0]['price_' + currency_convert_to_lowercase]
     price = float(json_convert_price)
     date_time = time.strftime("%b %d %Y %H:%M:%S")
@@ -197,66 +184,50 @@ def add_watchlistname(watchlist_name):
 
 def add_watchlist_pair_method(watchlistid,cryptocurrencyid,currency):
     watchlistinfo = exchange_rate(cryptocurrencyid,currency)
-    if not session['logged_in']:
-        abort(401)
     db=get_db()
-    db.execute("insert into watchlist_items(watchlist_id,cryptocurrency,currency,current_value,current_time) values (?,?,?,?,?)",
-               [watchlistid, cryptocurrencyid, currency, watchlistinfo['price'], watchlistinfo['date_time']])
-    cursor = db.execute("select * from historical_watchlist_data where historical_watchlist_data.watchlist_id = ?", [watchlistid])
-    if len(cursor.fetchall())< 1 :
-        db.execute(
-            "insert into historical_watchlist_data(watchlist_id,cryptocurrency,currency,old_value,old_time) values (?,?,?,?,?)",
-            [watchlistid, cryptocurrencyid, currency, watchlistinfo['price'], watchlistinfo['date_time']])
-    getUpdatedWatchlistExchanges()
+    # db.execute("insert into watchlist_items(watchlist_id,cryptocurrency,currency,current_value,current_time) values (?,?,?,?,?)",
+    #            [watchlistid, cryptocurrencyid, currency, watchlistinfo['price'], watchlistinfo['date_time']])
+    # cursor = db.execute("select * from historical_watchlist_data where historical_watchlist_data.watchlist_id = ?", [watchlistid])
+    # if len(cursor.fetchall())< 1 :
+    #     db.execute(
+    #         "insert into historical_watchlist_data(watchlist_id,cryptocurrency,currency,old_value,old_time) values (?,?,?,?,?)",
+    #         [watchlistid, cryptocurrencyid, currency, watchlistinfo['price'], watchlistinfo['date_time']])
+    db.execute(
+        "insert into watchlist_items(watchlist_id,cryptocurrency,currency,current_value,current_time) values (?,?,?,?,?)",
+        [watchlistid, cryptocurrencyid, currency, watchlistinfo['price'], watchlistinfo['date_time']])
+    db.commit()
+    # getUpdatedWatchlistExchanges()
     db.commit()
     flash('New pair added')
 
 
 @app.route('/addpair', methods=['GET', 'POST'])
 def add_watchlist_pair():
-    if not session['logged_in']:
-        abort(401)
-    else:
+        auth_user = session.get("username")
         if request.method == 'POST':
             msg = request.form['cryptocurrency'].split(" ")
             cryptocurrencyid=msg[0]
             currency = request.form['currency']
-            watchlist_name=msg[1]
-            watchlist_id=msg[2]
-            add_watchlist_pair_method(watchlist_id,cryptocurrencyid,currency)
+            showwatchlist = msg[1]
+            cur = get_db().execute(
+                "select watchlist_id from user_watchlists where username = ? and watchlist_name=? order by watchlist_id desc limit 1",
+                [auth_user, showwatchlist])
+            getWatchListID = cur.fetchone()
+            add_watchlist_pair_method(getWatchListID['watchlist_id'],cryptocurrencyid,currency)
+            watchlistsname = get_user_watchlistsname()
+            user_watchlist = get_user_watchlists(getWatchListID['watchlist_id'])
         else:
-            msg = request.args.get("name").split("_")
-            watchlist_name=msg[0]
-        watchlistsname = get_user_watchlistsname()
-        user_watchlist = get_user_watchlists(watchlist_name)
-        show_watchlists=get_user_watchlists_id(watchlist_name)
-    return render_template("dashboard.html",watchlists=user_watchlist, watchlistsname=watchlistsname,showwatchlist=show_watchlists)
-
-
-@app.route('/addwatchlist', methods=['GET', 'POST'])
-def add_watchlist():
-    addwatchlist=1
-    if not session['logged_in']:
-        abort(401)
-    else:
-        addwatchlist = 1
-        if request.method == 'POST':
-            watchlistname = request.form['watchlistname']
-            addwatchlist = None
-            add_watchlistname(watchlistname)
-            flash("add watch list Success!")
-    watchlistsname = get_user_watchlistsname()
-    return render_template('dashboard.html',watchlistsname=watchlistsname, addwathlist=addwatchlist)
-
+            showwatchlist = request.args.get("name")
+            watchlistID = request.args.get("id")
+            watchlistsname = get_user_watchlistsname()
+            user_watchlist = get_user_watchlists(watchlistID)
+        return render_template("dashboard.html",watchlists=user_watchlist, watchlistsname=watchlistsname,showwatchlist=showwatchlist)
 
 @app.route('/deletewatchlist', methods=['GET', 'POST'])
 def delete_watchlist():
-    if not session['logged_in']:
-        abort(401)
     meg = request.args.get("name").split("_")
-    watchlistname=meg[1]
-    watchlistid=meg[2]
-    delete_watchlist_method(session['username'], watchlistname,watchlistid)
+    watchlistID = request.args.get("id")
+    delete_watchlist_method(session['username'], meg[1], watchlistID)
     flash("delete watch list Success!")
     watchlistsname = get_user_watchlistsname()
     return render_template("dashboard.html", watchlistsname=watchlistsname)
@@ -266,32 +237,79 @@ def delete_watchlist():
 def delete_pair():
     if not session['logged_in']:
         abort(401)
+    auth_user = session.get("username")
     meg = request.args.get("name").split("_")
-    watchlists_name=meg[0]
-    watchlistid=meg[1]
-    cryptocurrency=meg[2]
-    currency=meg[3]
-    delete_userwatchlistspair(watchlistid,cryptocurrency,currency)
+    watchlistid = request.args.get("id")
+    delete_userwatchlistspair(auth_user,meg[0],meg[1],meg[2],watchlistid)
     flash("delete Success!")
     watchlistsname = get_user_watchlistsname()
-    user_watchlist = get_user_watchlists(watchlists_name)
-    showwatchlist = get_user_watchlists_id(watchlists_name)
+    user_watchlist = get_user_watchlists(watchlistid)
+    showwatchlist=meg[0]
     return render_template("dashboard.html", watchlistsname=watchlistsname, watchlists=user_watchlist,showwatchlist=showwatchlist)
 
 
+def delete_watchlist_method(username,watchlistname, watchlistid):
+    db = get_db()
+    cur = db.execute(
+        'delete from watchlist_items where watchlist_items.watchlist_id=?',
+        [watchlistid])
+    db.commit()
+    cur.fetchall()
+    cur.close()
+    cur = db.execute(
+        'delete from historical_watchlist_data where historical_watchlist_data.watchlist_id=?',
+        [watchlistid])
+    db.commit()
+    cur.fetchall()
+    cur.close()
+    cur = db.execute(
+        'delete from user_watchlists where user_watchlists.username=? and user_watchlists.watchlist_name =? and  user_watchlists.watchlist_id=?',
+        [username, watchlistname, watchlistid])
+    db.commit()
+    cur.fetchall()
+    cur.close()
 
-def crypto_currency_list():
-    main_api = 'https://api.coinmarketcap.com/v1/ticker/'
-    json_data = requests.get(main_api).json()
-    crypto_list = []
-    for data in json_data:
-        crypto_list.append(data['id'])
-    return crypto_list
+
+def delete_userwatchlistspair(username,watchlistname,cryptocurrency,currency,id):
+    db = get_db()
+    cur = db.execute('DELETE FROM watchlist_items where watchlist_items.cryptocurrency  = ? and watchlist_items.currency   = ? and watchlist_items.watchlist_id   = ?',[cryptocurrency,currency,id])
+    db.commit()
+    cur.fetchall()
+    cur.close()
+    cur = db.execute(
+        'DELETE FROM historical_watchlist_data where historical_watchlist_data.watchlist_id=? and historical_watchlist_data.cryptocurrency  = ? and historical_watchlist_data.currency   = ?',
+        [id, cryptocurrency, currency])
+    db.commit()
+    cur.fetchall()
+    cur.close()
 
 
-def monetary_currency_list():
-    monetary_list = ["USD", "AUD", "BRL", "CAD", "CHF", "CNY", "EUR", "GBP", "HKD", "IDR", "INR", "JPY", "KRW", "MXN", "RUB"]
-    return monetary_list
+def add_watchlistname(watchlist_name):
+    auth_user = session.get("username")
+    db=get_db()
+    db.execute("insert into user_watchlists(username, watchlist_name) values (?,?)", [auth_user, watchlist_name])
+    db.commit()
+
+
+def add_watchlist_pair_method(watchlistId,cryptocurrencyid,currency):
+    watchlistinfo = exchange_rate(cryptocurrencyid,currency)
+    db=get_db()
+    db.execute("insert into watchlist_items(watchlist_id,cryptocurrency,currency,current_value,current_time) values (?,?,?,?,?)",
+               [watchlistId,cryptocurrencyid, currency, watchlistinfo['price'], watchlistinfo['date_time']])
+    db.commit()
+    flash('New pair added')
+
+@app.route('/addwatchlist', methods=['GET', 'POST'])
+def add_watchlist():
+    addwatchlist=1
+    if request.method == 'POST':
+        watchlistname = request.form['watchlistname']
+        addwatchlist = None
+        add_watchlistname(watchlistname)
+        flash("add watch list Success!")
+    watchlistsname = get_user_watchlistsname()
+    return render_template('dashboard.html',watchlistsname=watchlistsname, addwathlist=addwatchlist)
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -376,7 +394,7 @@ def start():
         SECRET_KEY='Production key',
     ))
     app.config.from_envvar('COINMART_SETTINGS',  silent=True)
-    app.run(port=5003)
+    app.run(port=5000)
 
 
 def test_server():
@@ -407,5 +425,4 @@ def shutdown_server():
 
 if __name__ == '__main__':
     # start()
-    # initdb_command()
     app.run(port=5050)
